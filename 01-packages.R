@@ -9,7 +9,7 @@ if (!require("Require", quietly = TRUE)) {
 
 Require("PredictiveEcology/SpaDES.install@development")
 
-#installSpaDES(dontUpdate = .spatialPkgs, upgrade = "never")
+installSpaDES(dontUpdate = .spatialPkgs, upgrade = "never")
 
 if (FALSE) {
   installSpatialPackages()
