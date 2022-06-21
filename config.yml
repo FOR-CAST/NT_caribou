@@ -1,0 +1,73 @@
+default:
+  batchmode: false
+  cachedb: "sqlite"
+  cacheformat: "qs"
+  climategcm: "CanESM5" ## 'CanESM5', 'CNRM-ESM2-1'
+  climatessp: 370 ## 245, 370, 585
+  cloud:
+    cachedir: "1vuXsTRma-vySEAvkofP8aTUqZhUVsxd0"
+    googleuser: ""
+    usecloud: false
+    googledrivecache: null
+  codechecks: true
+  delaystart: 0
+  messagingNumCharsModule: 21
+  nreps: 5
+  paths:
+    cachedir: "cache"
+    inputpaths: null
+    libpathdeoptim: !expr Require::checkPath(ifelse(nzchar(Sys.getenv("PRJ_PKG_DIR")), Sys.getenv("PRJ_PKG_DIR"), "packages"))
+    scratchdir: !expr file.path(dirname(tempdir()), "scratch", "NT_caribou")
+  plot: true
+  reproduciblealgorithm: 2
+  reupload: false
+  run: 1
+  simfileformat: "qs"
+  studyarea: "NT1"
+  uselandrcs: true
+  usememoise: false
+  useprerun: true
+  userequire: true
+  useterra: false
+
+production:
+  batchmode: true
+  codechecks: false
+  delaystart: !expr sample(15L:45L, 1) # 15-45 minute delay to stagger starts
+  plot: false
+
+alex:
+  inherits: production
+  cachedb: !expr if (grepl("spades", Sys.info()[["nodename"]])) "sqlite" else "postgresql"
+  cacheformat: "qs"
+  cloud:
+    #cachedir: ""
+    googleuser: "achubaty@for-cast.ca"
+    usecloud: false ## TODO: use cloud cache
+  codechecks: false ## TODO: set false after all fixed
+  messagingNumCharsModule: 36
+  nreps: 5
+  paths:
+    libpathdeoptim: "~/GitHub/NT_caribou/packages"
+    scratchdir: !expr if (grepl("for-cast[.]ca", Sys.info()[["nodename"]])) "/mnt/scratch/NT_caribou" else "/tmp/scratch/NT_caribou"
+  reupload: !expr if (grepl("picea", Sys.info()[["nodename"]])) TRUE else FALSE
+  simfileformat: "qs"
+  slackchannel: "@alex.chubaty"
+  useprerun: !expr if (grepl("spades|pseudotsuga", Sys.info()[["nodename"]])) TRUE else FALSE
+
+tati:
+  inherits: production
+  cachedb: "sqlite"
+  cacheformat: "qs"
+  cloud:
+    #cachedir: ""
+    googleuser: "tati.micheletti@gmail.com"
+    usecloud: false ## TODO: use cloud cache
+  codechecks: false ## TODO: set false after all fixed
+  nreps: 5
+  paths:
+    scratchdir: "/mnt/scratch/tmichele/" ## !expr if (grepl("for-cast[.]ca", Sys.info()[["nodename"]])) "/mnt/scratch/NT_caribou" else "/tmp/scratch/NT_caribou"
+  reupload: !expr if (grepl("picea", Sys.info()[["nodename"]])) TRUE else FALSE
+  simfileformat: "qs"
+  useprerun: !expr if (grepl("spades|pseudotsuga", Sys.info()[["nodename"]])) TRUE else FALSE
+  userequire: false

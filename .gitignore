@@ -1,0 +1,36 @@
+# R and Rstudio files
+.Rhistory
+.Rapp.history
+.RData
+.Ruserdata
+.Rproj.user/
+.Renviron
+Rplots*.pdf
+
+## R package libraries
+packages/*
+
+# simulation, knitr and R markdown cache directories
+*_cache/
+/cache/
+cache/
+cache
+.channel_cache
+
+# Temporary files created by R markdown
+*.utf8.md
+*.knit.md
+
+# simulation files + directories
+config_db.yml
+inputs*/
+inputs
+outputs*/
+outputs*
+
+# saved simLists
+spreadOut*
+
+# googledrive/gargle auth
+.secret
+western-boreal-initiative-*.json
