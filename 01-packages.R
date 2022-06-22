@@ -23,7 +23,7 @@ if (FALSE) {
 if (FALSE) {
   install.packages("https://cran.r-project.org/src/contrib/Archive/gdalUtils/gdalUtils_2.0.3.2.tar.gz", repos = NULL)
   install.packages("https://cran.r-project.org/src/contrib/Archive/RandomFields/RandomFields_3.3.14.tar.gz", repos = NULL)
-  install.packages(c("foreach", "R.utils")) ## TODO: RandomFields ?
+  install.packages(c("foreach", "R.utils"))
   remotes::install_github("PredictiveEcology/LandR@development")
 }
 

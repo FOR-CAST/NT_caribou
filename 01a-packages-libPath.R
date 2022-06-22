@@ -1,5 +1,3 @@
-if (file.exists(".Renviron")) readRenviron(".Renviron")
-
 pkgDir <- Sys.getenv("PRJ_PKG_DIR")
 if (!nzchar(pkgDir)) {
   pkgDir <- "packages" ## default: use subdir within project directory

@@ -1,3 +1,5 @@
+if (file.exists(".Renviron")) readRenviron(".Renviron")
+
 source("01-packages.R")
 
 source("02-init.R")

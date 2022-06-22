@@ -1,3 +1,5 @@
+if (file.exists(".Renviron")) readRenviron(".Renviron")
+
 source("01-packages.R")
 
 source("02-init.R")
@@ -10,7 +12,7 @@ source("05-google-ids.R")
 #   Sys.sleep(delayStart*60)
 # }
 
-reupload = FALSE; usePrerun = FALSE;
+#reupload = FALSE; usePrerun = FALSE;
 source("06-studyArea.R")
 
 source("07a-dataPrep_2001.R")

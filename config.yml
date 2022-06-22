@@ -23,7 +23,7 @@ default:
   reupload: false
   run: 1
   simfileformat: "qs"
-  studyarea: "NT1"
+  studyarea: "NT1_BCR6" ## "NT1"
   uselandrcs: true
   usememoise: false
   useprerun: true
