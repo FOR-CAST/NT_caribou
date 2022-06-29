@@ -4,8 +4,6 @@ if (getDTthreads() > 4) {
 
 switch(Sys.info()[["user"]],
        "achubaty" = Sys.setenv(R_CONFIG_ACTIVE = "alex"),
-       "ieddy" = Sys.setenv(R_CONFIG_ACTIVE = "ian"),
-       "emcintir" = Sys.setenv(R_CONFIG_ACTIVE = "eliot"),
        "tmichele" = Sys.setenv(R_CONFIG_ACTIVE = "tati"),
        Sys.setenv(R_CONFIG_ACTIVE = "test")
 )
@@ -19,6 +17,7 @@ cloudCacheFolderID <- config::get("cloud")[["cachedir"]]
 codeChecks <- config::get("codechecks")
 delayStart <- config::get("delaystart")
 fitUsing <- if (grepl("for-cast[.]ca", Sys.info()[["nodename"]])) 3 else 0
+historicFireYears <- 2011:2020 ## years to use data instead of simulating fires in main sim
 libPathDEoptim <- file.path(config::get("paths")[["libpathdeoptim"]], version$platform,
                             paste0(version$major, ".", strsplit(version$minor, "[.]")[[1]][1]))
 messagingNumCharsModule <- config::get("messagingNumCharsModule")

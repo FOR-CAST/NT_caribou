@@ -17,7 +17,7 @@ preambleParams <- list(
     climateGCM = climateGCM,
     climateSSP = climateSSP,
     historicalFireYears = 1991:2020,
-    studyAreaName = studyAreaName
+    studyAreaName = "NT"
   ),
   caribouNT_studyArea = list(
     .runName = runName,

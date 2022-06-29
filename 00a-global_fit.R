@@ -12,9 +12,10 @@ source("05-google-ids.R")
 #   Sys.sleep(delayStart*60)
 # }
 
-#reupload = FALSE; usePrerun = FALSE;
+reupload = FALSE; usePrerun = TRUE;
 source("06-studyArea.R")
 
+reupload = TRUE; usePrerun = FALSE;
 source("07a-dataPrep_2001.R")
 source("07b-dataPrep_2011.R")
 source("07c-dataPrep_fS.R")

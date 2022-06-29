@@ -114,7 +114,8 @@ dynamicOutputs <- rbind(annualRasters, annualObjects, finalYearOutputs)
 fs_predict_modules <- c("fireSense_IgnitionPredict", "fireSense_EscapePredict", "fireSense_SpreadPredict")
 dynamicParams <- list(
   .globals = list(
-    initialB = NA
+    initialB = NA,
+    .runInitialTime = max(historicFireYears) + 1 ## fireSense simulates fires for years w/o data
   ),
   Biomass_core = list(
     growthAndMortalityDrivers = ifelse(isTRUE(useLandR.CS), "LandR.CS", "LandR"),
@@ -145,6 +146,9 @@ dynamicParams <- list(
     .useCache = FALSE, # default: ".inputObjects"
     doPlotting = TRUE,
     yearOfFirstClimateImpact = times$start
+  ),
+  historicFires = list(
+    historicFireYears = historicFireYears
   )
 )
 
