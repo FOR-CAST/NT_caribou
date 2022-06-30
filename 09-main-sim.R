@@ -148,7 +148,7 @@ dynamicParams <- list(
     yearOfFirstClimateImpact = times$start
   ),
   historicFires = list(
-    historicFireYears = historicFireYears
+    staticFireYears = historicFireYears
   )
 )
 
