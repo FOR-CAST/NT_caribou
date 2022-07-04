@@ -84,7 +84,6 @@ spreadFitParams <- list(
   )
 )
 
-#spreadOut <- readRDS("spreadOut_2021-03-01_Limit4_300_SNLL_FS_thresh_jF0YfA")
 spreadFitObjects <- list(
   fireBufferedListDT = fSsimDataPrep[["fireBufferedListDT"]],
   firePolys = fSsimDataPrep[["firePolys"]],

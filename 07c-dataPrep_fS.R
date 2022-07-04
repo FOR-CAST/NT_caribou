@@ -57,6 +57,11 @@ if (isTRUE(usePrerun)) {
   saveSimList(fSsimDataPrep, ffSsimDataPrep, fileBackend = 2)
 }
 
+## assertions / checks for objects following fireSense overhaul
+stopifnot(
+  !is.null(fSsimDataPrep[["fireSense_spreadFormula"]]),
+)
+
 if (isTRUE(upload_fSsimDataPrep)) {
   fdf <- googledrive::drive_put(media = ffSsimDataPrep, path = as_id(gdriveURL), name = basename(ffSsimDataPrep))
   gid_fSsimDataPrep <- as.character(fdf$id)
@@ -66,6 +71,4 @@ if (isTRUE(upload_fSsimDataPrep)) {
                gcm = NA, ssp = NA, gid = gid_fSsimDataPrep),
     gdriveSims
   )
-
-  source("R/upload_fSDatPrepFit_vegCoeffs.R")
 }
