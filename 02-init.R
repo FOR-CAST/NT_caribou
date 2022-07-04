@@ -16,7 +16,7 @@ climateSSP <- as.numeric(config::get("climatessp"))
 cloudCacheFolderID <- config::get("cloud")[["cachedir"]]
 codeChecks <- config::get("codechecks")
 delayStart <- config::get("delaystart")
-fitUsing <- if (grepl("for-cast[.]ca", Sys.info()[["nodename"]])) 3 else 0
+fitUsing <- if (grepl("for-cast[.]ca", Sys.info()[["nodename"]])) 4 else 0
 historicFireYears <- 2011:2020 ## years to use data instead of simulating fires in main sim
 libPathDEoptim <- file.path(config::get("paths")[["libpathdeoptim"]], version$platform,
                             paste0(version$major, ".", strsplit(version$minor, "[.]")[[1]][1]))

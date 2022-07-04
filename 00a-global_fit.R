@@ -21,10 +21,10 @@ source("07c-dataPrep_fS.R")
 
 message(crayon::red("Data prep", runName, "complete"))
 
-reupload = TRUE; usePrerun = FALSE;
 source("08a-ignitionFit.R") ## 290 GB; 50 mins
 source("08b-escapeFit.R")
 
+reupload = TRUE; usePrerun = FALSE;
 for (i in 1:nReps) {
   run <- i
   runName <- gsub("run[0-9][0-9]", sprintf("run%02d", run), runName)
