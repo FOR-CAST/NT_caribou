@@ -3,6 +3,7 @@ do.call(setPaths, dynamicPaths)
 times <- list(start = 2011, end = 2100)
 
 dynamicModules <- list(
+  "historicFires",
   "fireSense_dataPrepPredict",
   "fireSense",
   "fireSense_IgnitionPredict",

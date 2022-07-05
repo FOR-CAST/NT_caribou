@@ -59,7 +59,7 @@ if (isTRUE(usePrerun)) {
 
 ## assertions / checks for objects following fireSense overhaul
 stopifnot(
-  !is.null(fSsimDataPrep[["fireSense_spreadFormula"]]),
+  !is.null(fSsimDataPrep[["fireSense_spreadFormula"]])
 )
 
 if (isTRUE(upload_fSsimDataPrep)) {
