@@ -68,6 +68,7 @@ rastersToSaveAnnually <- c(
   "simulatedBiomassMap"
 )
 
+## TODO: fireSense rasters not output 2011:2020; throws warnings
 annualRasters <- data.frame(
   expand.grid(
     objectName = rastersToSaveAnnually,
@@ -78,6 +79,7 @@ annualRasters <- data.frame(
   stringsAsFactors = FALSE
 )
 annualRasters$file <- paste0(annualRasters$objectName, "_", annualRasters$saveTime, ".tif")
+annualRasters$arguments <- I(list(list(overwrite = TRUE, progress = FALSE, format = "GTiff")))
 
 objectsToSaveAnnually <- c(
   "cohortData" ## data.table
@@ -88,7 +90,8 @@ annualObjects <- data.frame(
     objectName = objectsToSaveAnnually,
     saveTime = seq(times$start, times$end, 1),
     fun = "qsave",
-    package = "qs"
+    package = "qs",
+    arguments = I(list(list()))
   ),
   stringsAsFactors = FALSE
 )
@@ -107,6 +110,7 @@ finalYearOutputs <- data.frame(
   fun = "qsave",
   package = "qs",
   file = paste0(objectNamesToSaveAtEnd, ".qs"),
+  arguments = I(list(list(), list(), list(), list())),
   stringsAsFactors = FALSE
 )
 
