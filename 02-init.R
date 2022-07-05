@@ -45,8 +45,8 @@ if (!exists("runName")) {
 } else {
   chunks <- strsplit(runName, "_")[[1]]
   climateSSP <- substr(chunks[length(chunks) - 1], 4, 6)
-  climateGCM <- if (grepl("ensemble", runName)) paste0(chunks[2], "_", chunks[3]) else chunks[2]
-  studyAreaName <- chunks[1]
+  climateGCM <- chunks[length(chunks) - 2]
+  #studyAreaName <- chunks[1] ## TODO
   run <- as.numeric(substr(chunks[length(chunks)], 4, 5))
 }
 
