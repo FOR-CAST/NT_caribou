@@ -1,5 +1,10 @@
 if (file.exists(".Renviron")) readRenviron(".Renviron")
 
+#runName = "NT1_BCR6_CanESM5_SSP370_run01"
+#runName = "NT1_BCR6_CanESM5_SSP585_run01"
+#runName = "NT1_BCR6_CNRM-ESM2-1_SSP370_run01"
+#runName = "NT1_BCR6_CNRM-ESM2-1_SSP585_run01"
+
 source("01-packages.R")
 
 source("02-init.R")
