@@ -12,7 +12,7 @@ default:
   codechecks: true
   delaystart: 0
   messagingNumCharsModule: 21
-  nreps: 5
+  nreps: 10
   paths:
     cachedir: "cache"
     inputpaths: null
