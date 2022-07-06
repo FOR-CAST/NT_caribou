@@ -38,5 +38,5 @@ Require(c("config", "RCurl", "RPostgres", "tictoc", "XML"), require = FALSE)
 Require(c("data.table", "plyr", "pryr",
           "PredictiveEcology/reproducible@development (>= 1.2.8.9040)",
           "PredictiveEcology/LandR@development", ## TODO: workaround weird raster/sf method problem
-          "PredictiveEcology/SpaDES.core@development (>= 1.0.10.9003)",
+          "PredictiveEcology/SpaDES.core@development (>= 1.0.10.9016)",
           "archive", "googledrive", "httr", "slackr"), upgrade = FALSE)
