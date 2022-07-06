@@ -153,7 +153,7 @@ finalYearOutputs <- data.frame(
   fun = "qsave",
   package = "qs",
   file = paste0(objectNamesToSaveAtEnd, ".qs"),
-  arguments = I(list(list(), list(), list(), list())),
+  arguments = I(list(list(nthreads = 1), list(nthreads = 1), list(nthreads = 1), list(nthreads = 1))),
   stringsAsFactors = FALSE
 )
 
