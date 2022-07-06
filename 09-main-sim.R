@@ -16,6 +16,49 @@ dynamicModules <- list(
 dynamicModules <- lapply(dynamicModules, function(m) if (nzchar(m)) m)
 dynamicModules[sapply(dynamicModules, is.null)] <- NULL ## this is bananas!
 
+# parameters ----------------------------------------------------------------------------------
+fs_predict_modules <- c("fireSense_IgnitionPredict", "fireSense_EscapePredict", "fireSense_SpreadPredict")
+dynamicParams <- list(
+  .globals = list(
+    initialB = NA,
+    .runInitialTime = max(historicFireYears) + 1 ## fireSense simulates fires for years w/o data
+  ),
+  Biomass_core = list(
+    growthAndMortalityDrivers = ifelse(isTRUE(useLandR.CS), "LandR.CS", "LandR"),
+    sppEquivCol = fSsimDataPrep@params$fireSense_dataPrepFit$sppEquivCol,
+    vegLeadingProportion = 0, ## apparently `sppColorVect` has no mixed colour
+    .plots = c("object", "png", "raw"),
+    .studyAreaName = studyAreaName
+  ),
+  Biomass_regeneration = list(
+    fireInitialTime = times$start + 1 #regeneration is scheduled earlier, so it starts in 2012
+  ),
+  fireSense_dataPrepPredict = list(
+    fireTimeStep = 1,
+    sppEquivCol = simOutPreamble$sppEquivCol,
+    missingLCCgroup = fSsimDataPrep@params$fireSense_dataPrepFit$missingLCCgroup,
+    whichModulesToPrepare = fs_predict_modules
+  ),
+  fireSense_ignitionPredict = list(
+    ##
+  ),
+  fireSense = list(
+    .plotInterval = NA,
+    .plotInitialTime = .plotInitialTime,
+    plotIgnitions = FALSE,
+    whichModulesToPrepare = fs_predict_modules
+  ),
+  gmcsDataPrep = list(
+    .useCache = FALSE, # default: ".inputObjects"
+    doPlotting = TRUE,
+    yearOfFirstClimateImpact = times$start
+  ),
+  historicFires = list(
+    staticFireYears = historicFireYears
+  )
+)
+
+# objects -------------------------------------------------------------------------------------
 dynamicObjects <- list(
   .runName = runName,
   ATAstack = simOutPreamble[["ATAstack"]],
@@ -115,47 +158,6 @@ finalYearOutputs <- data.frame(
 )
 
 dynamicOutputs <- rbind(annualRasters, annualObjects, finalYearOutputs)
-
-fs_predict_modules <- c("fireSense_IgnitionPredict", "fireSense_EscapePredict", "fireSense_SpreadPredict")
-dynamicParams <- list(
-  .globals = list(
-    initialB = NA,
-    .runInitialTime = max(historicFireYears) + 1 ## fireSense simulates fires for years w/o data
-  ),
-  Biomass_core = list(
-    growthAndMortalityDrivers = ifelse(isTRUE(useLandR.CS), "LandR.CS", "LandR"),
-    sppEquivCol = fSsimDataPrep@params$fireSense_dataPrepFit$sppEquivCol,
-    vegLeadingProportion = 0, ## apparently `sppColorVect` has no mixed colour
-    .plots = c("object", "png", "raw"),
-    .studyAreaName = studyAreaName
-  ),
-  Biomass_regeneration = list(
-    fireInitialTime = times$start + 1 #regeneration is scheduled earlier, so it starts in 2012
-  ),
-  fireSense_dataPrepPredict = list(
-    fireTimeStep = 1,
-    sppEquivCol = simOutPreamble$sppEquivCol,
-    missingLCCgroup = fSsimDataPrep@params$fireSense_dataPrepFit$missingLCCgroup,
-    whichModulesToPrepare = fs_predict_modules
-  ),
-  fireSense_ignitionPredict = list(
-    ##
-  ),
-  fireSense = list(
-    .plotInterval = NA,
-    .plotInitialTime = .plotInitialTime,
-    plotIgnitions = FALSE,
-    whichModulesToPrepare = fs_predict_modules
-  ),
-  gmcsDataPrep = list(
-    .useCache = FALSE, # default: ".inputObjects"
-    doPlotting = TRUE,
-    yearOfFirstClimateImpact = times$start
-  ),
-  historicFires = list(
-    staticFireYears = historicFireYears
-  )
-)
 
 ## TODO: delete unused objects, including previous simLists to free up memory
 
