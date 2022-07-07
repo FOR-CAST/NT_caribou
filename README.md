@@ -1,5 +1,7 @@
 # NT_caribou
 
+Caribou population and RSF projections for regional range planning in the Northwest Territories, Canada.
+
 ## Getting started
 
 ### Getting the code
