@@ -15,6 +15,7 @@ git submodule add https://github.com/PredictiveEcology/Biomass_regeneration modu
 git submodule add https://github.com/PredictiveEcology/Biomass_speciesData modules/Biomass_speciesData
 git submodule add https://github.com/PredictiveEcology/Biomass_speciesFactorial modules/Biomass_speciesFactorial
 git submodule add https://github.com/PredictiveEcology/Biomass_speciesParameters modules/Biomass_speciesParameters
+git submodule add https://github.com/PredictiveEcology/Biomass_summary modules/Biomass_summary
 git submodule add https://github.com/ianmseddy/gmcsDataPrep modules/gmcsDataPrep
 
 ## fireSense
@@ -27,6 +28,7 @@ git submodule add https://github.com/PredictiveEcology/fireSense_SpreadFit modul
 git submodule add https://github.com/PredictiveEcology/fireSense_SpreadPredict modules/fireSense_SpreadPredict
 git submodule add https://github.com/PredictiveEcology/fireSense_dataPrepFit modules/fireSense_dataPrepFit
 git submodule add https://github.com/PredictiveEcology/fireSense_dataPrepPredict modules/fireSense_dataPrepPredict
+git submodule add https://github.com/PredictiveEcology/fireSense_summary modules/fireSense_summary
 
 ####################################################################################################
 
