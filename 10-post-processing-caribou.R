@@ -19,30 +19,42 @@ options(
 source("05-google-ids.R")
 
 nodeName <- Sys.info()[["nodename"]]
-studyAreaNames <- c("NT1")
-wildlifeModules <- list("caribouPopGrowthModel") ## TODO: caribouRSF_NT
+studyAreaNames <- c("NT1_BCR6")
+wildlifeModules <- list("caribouPopGrowthModel", "caribouRSF_NT")
 climateGCMs <- c("CanESM5", "CNRM-ESM2-1")
 climateSSPs <- c("SSP370", "SSP585")
 
-for (RP in c(paste0("run0", 1:nReps))) {
+
+# source('06-studyArea.R')
+#TODO source 06 Still not working until the end, but generated the RTM, so needs fixing
+
+source("~/GitHub/NT_caribou/R/rstCurrentBurnListGenerator_NT.R")
+source("~/GitHub/NT_caribou/R/makeStudyArea_NT_caribou.R")
+
+useLockFile <- TRUE
+REPS <- c("run01", "run02", "run03", "run04", "run05", "run06", "run07",
+           "run08", "run09", "run10")
+
+for (RP in REPS) {
   for (CS in climateGCMs) {
     for (SS in climateSSPs) {
       for (P in studyAreaNames) {
         fls <- list.files(file.path("outputs", P, "posthoc"))
         if (length(fls) != 0) {
           ## TODO: is this same as the grepMulti in usefulFuns? conflicts???
-          grepMulti <- function(x, patterns, unwanted = NULL) {
-            rescued <- sapply(x, function(fun) all(sapply(X = patterns, FUN = grepl, fun)))
-            recovered <- x[rescued]
-            if (!is.null(unwanted)) {
-              discard <- sapply(recovered, function(fun) all(sapply(X = unwanted, FUN = grepl, fun)))
-              afterFiltering <- recovered[!discard]
-              return(afterFiltering)
-            } else {
-              return(recovered)
-            }
-          }
-
+          ## # TM: No, I just wanted to avoid loading the package for only this function.
+          ## If it is working, though, I don't need it.
+          # grepMulti <- function(x, patterns, unwanted = NULL) {
+          #   rescued <- sapply(x, function(fun) all(sapply(X = patterns, FUN = grepl, fun)))
+          #   recovered <- x[rescued]
+          #   if (!is.null(unwanted)) {
+          #     discard <- sapply(recovered, function(fun) all(sapply(X = unwanted, FUN = grepl, fun)))
+          #     afterFiltering <- recovered[!discard]
+          #     return(afterFiltering)
+          #   } else {
+          #     return(recovered)
+          #   }
+          # }
           allFls <- grepMulti(fls,
                               patterns = c(RP, CS, SS, P),
                               unwanted = ".aux.xml")
@@ -51,7 +63,8 @@ for (RP in c(paste0("run0", 1:nReps))) {
             next
           }
         }
-        message(crayon::yellow(paste0("Simulations starting for:", paste(P, SS, CS, RP, collapse = " "))))
+        message(crayon::yellow(paste0("Simulations starting for:",
+                                      paste(P, SS, CS, RP, collapse = " "))))
 
         runName <- paste(P, CS, SS, RP, sep = "_")
         studyAreaName <- P
@@ -60,21 +73,33 @@ for (RP in c(paste0("run0", 1:nReps))) {
 
         do.call(setPaths, posthocPaths)
 
-        ## if a study area is already complete, skip it and do next one
-        donefile <- file.path(posthocPaths[["outputPath"]], paste0("00-DONE_", paste(P, SS, CS, RP, sep = "_")))
-        if (file.exists(donefile)) {
-          message("Postprocessing for study area ", studyAreaName, " previously completed. Skipping.")
-          next
-        }
+        if (useLockFile){
+          ## if a study area is already complete, skip it and do next one
+          donefile <- file.path(posthocPaths[["outputPath"]], paste0("00-DONE_",
+                                                                     paste(P, SS,
+                                                                           CS, RP,
+                                                                           sep = "_")))
+          if (file.exists(donefile)) {
+            message("Postprocessing for study area ", studyAreaName,
+                    " previously completed. Skipping.")
+            next
+          }
 
-        ## if a study area is already being processed in another R session, skip it and do next one
-        lockfile <- file.path(posthocPaths[["outputPath"]], paste0("00-LOCK_", studyAreaName))
-        if (file.exists(lockfile)) {
-          message("Found lockfile for study area ", studyAreaName, ". Skipping.")
-          next
-        } else {
-          file.create(lockfile)
-          on.exit({unlink(lockfile)}, add = TRUE)
+          ## if a GCM is already being processed in another R session, skip it and do next one
+          lockfile <- file.path(posthocPaths[["outputPath"]], paste0("00-LOCK_",
+                                                                     paste(P, SS,
+                                                                           CS, RP,
+                                                                           sep = "_")))
+          if (file.exists(lockfile)) {
+            message("Found lockfile for ",
+                    paste(P, SS,
+                          CS, RP,
+                          sep = "_"), ". Skipping.")
+            next
+          } else {
+            file.create(lockfile)
+            on.exit({unlink(lockfile)}, add = TRUE)
+          }
         }
 
         tic(paste0("Finished for ", runName, ". ELAPSED TIME: "))
@@ -89,15 +114,7 @@ for (RP in c(paste0("run0", 1:nReps))) {
         ClimateModel <- strsplit(runName, split = "_")[[1]][2]
         SSP <- strsplit(runName, split = "_")[[1]][3]
         # Determine study area long name
-        studyAreaLongName <- switch(studyAreaName, ## TODO: update for new study area module
-                                    AB = "Alberta",
-                                    BC = "British Columbia",
-                                    SK = "Saskatchewan",
-                                    MB = "Manitoba",
-                                    NT = "Northwest Territories & Nunavut",
-                                    NU = "Northwest Territories & Nunavut",
-                                    YT = "Yukon",
-                                    RIA = "RIA")
+        studyAreaLongName <- "Northwest Territories & Nunavut"
 
         # RTM
         pathRTM <- file.path(posthocPaths[["inputPath"]], paste0(studyAreaName, "_rtm.tif"))
@@ -116,36 +133,12 @@ for (RP in c(paste0("run0", 1:nReps))) {
         if (file.exists(pathSA)) {
           studyArea <- qs::qread(pathSA)
         } else {
-          studyArea <- makeStudyArea(studyAreaName)
+          studyArea <- makeStudyArea_NT_caribou(rasterToMatch = rasterToMatch,
+                                                pathSA = pathSA)
         }
 
-        ## Calculate number of cores and divide in groups if needed
-        birdSpecies <- checkBirdsAvailable_WBI(whichRun = Run) ## TODO: remove all bird stuff
-
-        cores <- if (NROW(birdSpecies) < 4) {
-          NROW(birdSpecies)
-        } else {
-          birdPredictionCoresCalc_WBI(birdSpecies = birdSpecies[["Species"]], sizeGbEachProcess = 8)
-        }
-
-        # Defining model version
-        if (!exists("birdModelVersion")) birdModelVersion <- c("reducedBAM") # Default if not provided
-        predictionInterval <- 20
-
-        urlStaticLayers <- "https://drive.google.com/drive/u/0/folders/1RPXqgq-M1mOKMYzUnVSpw_6sjJ4m07dj"
-
-        pixelsWithDataAtInitialization <- Cache(loadStaticLayers,
-                                                fileURL = urlStaticLayers, # Add Cache when fun is ready
-                                                pathData = posthocPaths[["inputPath"]],
-                                                studyArea = studyArea,
-                                                rasterToMatch = rasterToMatch,
-                                                Province = Province,
-                                                version = birdModelVersion,
-                                                allVariables = "Structure_Biomass_TotalLiveAboveGround_v1",
-                                                staticLayersNames = "Structure_Biomass_TotalLiveAboveGround_v1",
-                                                userTags = c(stepCacheTag, "objectName:pixelsWithDataAtInitialization"))
-
-        pixelsWithDataAtInitialization <- which(pixelsWithDataAtInitialization[] != 0)
+        listSACaribou <- studyArea$listSACaribou
+        studyArea <- studyArea$studyArea
 
         ############ WATER and WETLAND PREP WITH LCC LAYER #########
 
@@ -214,29 +207,8 @@ for (RP in c(paste0("run0", 1:nReps))) {
         forestOnly <- raster::setValues(x = landcoverMap, watersValsToChange)
         forestOnly[!is.na(forestOnly)] <- 1
 
-        #bSpG <- birdSpecies[Species %in% cores[["birdSpecies"]][[groupID]], Species] ## TODO: revisit
-        bSpG <- birdSpecies[, Species]
-
         # Add Parameters
         parameters <- list(
-          birdsNWT = list(
-            "predictLastYear" = FALSE,
-            "lowMem" = TRUE,
-            "scenario" = scenario, # composed by 2letterProvince_climateModel_SSP_runX
-            "useStaticPredictionsForNonForest" = TRUE,
-            "useOnlyUplandsForPrediction" = TRUE,
-            "baseLayer" = 2010,
-            "overwritePredictions" = FALSE,
-            "useTestSpeciesLayers" = FALSE, # Set it to false when you actually have results from
-            # LandR_Biomass simulations to run it with
-            "predictionInterval" = predictionInterval,
-            "nCores" = length(bSpG), #"auto", # If not to parallelize, use 1
-            "version" = birdModelVersion,
-            "RCP" = SSP,
-            "climateModel" = ClimateModel,
-            "climateResolution" = NULL,
-            "climateFilePath" = NULL
-          ),
           caribouPopGrowthModel = list(
             ".plotInitialTime" = NULL,
             "climateModel" = ClimateModel,
@@ -246,13 +218,20 @@ for (RP in c(paste0("run0", 1:nReps))) {
             ".growthInterval" = 10,
             "recruitmentModelVersion" = "Johnson", # Johnson or ECCC
             "recruitmentModelNumber" = "M4",
-            "femaleSurvivalModelNumber" = c("M1", "M4") # M1:M5 --> best models: M1, M4
+            "femaleSurvivalModelNumber" = "M1" # M1:M5 --> best models: M1, M4
+            # ATTENTION: recruitmentModelNumber and recruitmentModelVersion need to be paired. ie.
+            # if you want to run M3 from ECCC and M1 and M4 from Johnson you should put these as
+            #     "recruitmentModelVersion" = c("ECCC", "Johnson", "Johnson"),
+            #     "recruitmentModelNumber" = c("M3", "M1", "M4"),
+            # otherwise it will repeat the recruitmentModelVersion for all recruitmentModelNumber
+            # ATTENTION 2: Caribou metrics is NOT ready for multiple models and will error.
+          ),
+          caribouRSF_NT = list(
+            "cropRSFToShp" = TRUE, # Set this to FALSE (default) if you don't want the projection to be cropped
+            "yearsToSaveCaribouLayers" = seq(2011, 2091, by = 10),
+            "predictLastYear" = FALSE,
+            "plotTime" = NULL
           )
-          # ATTENTION: recruitmentModelNumber and recruitmentModelVersion need to be paired. ie.
-          # if you want to run M3 from ECCC and M1 and M4 from Johnson you should put these as
-          #     "recruitmentModelVersion" = c("ECCC", "Johnson", "Johnson"),
-          #     "recruitmentModelNumber" = c("M3", "M1", "M4"),
-          # otherwise it will repeat the recruitmentModelVersion for all recruitmentModelNumber
         )
 
         # Modules
@@ -268,9 +247,9 @@ for (RP in c(paste0("run0", 1:nReps))) {
                                        create = TRUE)
 
         # Reset input paths to the folder where simulation outputs are
-        posthocPaths[["inputPath"]] <- file.path("outputs", runName) # THIS IS THE ORIGINAL FOR WHEN THE RUNS ARE DONE
-
-        rstCurrentBurnList <- rstCurrentBurnListGenerator_WBI(pathInputs = posthocPaths[["inputPath"]])
+        posthocPaths[["inputPath"]] <- file.path("outputs", runName)
+        options("reproducible.destinationPath" = posthocPaths[["outputsPath"]]) # TRYING TO GET AROUND ANNOYING PERMISSION PROBLEMS
+        rstCurrentBurnList <- rstCurrentBurnListGenerator_NT(pathInputs = posthocPaths[["inputPath"]])
 
         # Add objects
         objects <- list(
@@ -280,21 +259,16 @@ for (RP in c(paste0("run0", 1:nReps))) {
           "waterRaster" = waterRaster,
           "wetlandsRaster" = wetlandsRaster,
           "uplandsRaster" = uplandsRaster,
-          "zipClimateDataFilesFolder" = zipClimateDataFilesFolder,
-          "climateDataFolder" = climateDataFolder, # Currently here, but should be moved to below
-          "pixelsWithDataAtInitialization" = pixelsWithDataAtInitialization,
           "studyAreaLongName" = studyAreaLongName, # For annual climate variables
-          "urlStaticLayers" = urlStaticLayers,
-          "urlModels" = birdSpecies, # birdSpecies[Species %in% cores[["birdSpecies"]][["Group1"]], ],
-          "birdsList" = bSpG,
           "rstLCC" = landcoverMap,
           "sppEquiv" = LandR::sppEquivalencies_CA, # Loading species equivalency table
-          "sppEquivCol" = "KNN",
+          "sppEquivCol" = "LandR",
           "forestOnly" = forestOnly,
           "rstCurrentBurnList" = rstCurrentBurnList,
           "runName" = runName,
-          "shortProvinceName" = Province
-        )
+          "shortProvinceName" = Province,
+          "listSACaribou" = listSACaribou,
+          "NT1shapefile" = studyArea)
 
         outputsBoo <- data.frame(objectName = c("predictedCaribou",
                                                 "disturbances"),
@@ -302,7 +276,7 @@ for (RP in c(paste0("run0", 1:nReps))) {
                                           paste0("disturbances_Year2091_", runName)),
                                  saveTime = Times$end)
 
-        message(crayon::yellow(paste0("Starting simulations for BIRDS and BOO using ",
+        message(crayon::yellow(paste0("Starting simulations for BOO using ",
                                       paste(ClimateModel, SSP, collapse = " "),
                                       " for ", Province, " (", Run, ")")))
 
