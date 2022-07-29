@@ -4,29 +4,23 @@ if (file.exists(".Renviron")) readRenviron(".Renviron")
 source("01-packages.R")
 
 Require(c("caribouMetrics", "ggplot2", "googledrive", "gridExtra",
-          "raster", "RColorBrewer", "sf", "tictoc", "usefulFuns"))
+          "raster", "RColorBrewer", "Rmisc", "sf", "tictoc", "usefulFuns"))
 
 source("02-init.R")
+reupload <- FALSE
 usePrerun <- TRUE
+
+climateGCMs <- c("CanESM5", "CNRM-ESM2-1")
+climateSSPs <- c("SSP370", "SSP585")
+nodeName <- Sys.info()[["nodename"]]
+studyAreaNames <- "NT1_BCR6"
+wildlifeModules <- list("caribouPopGrowthModel", "caribouRSF_NT")
 
 scratchDirOrig <- scratchDir
 source("03-paths.R")
-
 source("04-options.R")
-maxLimit <- 20000 # in MB
-options(
-  future.globals.maxSize = maxLimit*1024^2, ## we use ~6 GB for layers here
-  NCONNECTIONS = 120L  ## R cannot exceed 125 connections; use fewer to be safe
-)
-
 source("05-google-ids.R")
-
-nodeName <- Sys.info()[["nodename"]]
-
-studyAreaNames <- "NT1_BCR6"
-wildlifeModules <- list("caribouPopGrowthModel", "caribouRSF_NT")
-climateGCMs <- c("CanESM5", "CNRM-ESM2-1")
-climateSSPs <- c("SSP370", "SSP585")
+#source("06-studyArea.R") ## TODO: why isn't this used?
 
 do.call(setPaths, summaryPaths)
 
@@ -44,7 +38,7 @@ binningTable <- Cache(prepInputs,
 
 source("R/makeStudyArea_NT_caribou.R")
 
-pathRTM <- file.path(posthocPaths[["inputPath"]], paste0(studyAreaName, "_rtm.tif"))
+pathRTM <- file.path(summaryPaths[["inputPath"]], paste0(studyAreaName, "_rtm.tif"))
 
 if (file.exists(pathRTM)) {
   rasterToMatch <- raster(pathRTM)
@@ -52,12 +46,11 @@ if (file.exists(pathRTM)) {
   stop("RTM doesn't exist. Please run script 'source('06-studyArea.R')'")
 }
 
-# Make RTM have only 1's
+## Make RTM have only 1's
 rasterToMatch[!is.na(rasterToMatch)] <- 1
 
-# STUDY AREA
-
-pathSA <- file.path(posthocPaths[["inputPath"]], paste0(studyAreaName, "_SA.qs"))
+## STUDY AREA
+pathSA <- file.path(summaryPaths[["inputPath"]], paste0(studyAreaName, "_SA.qs"))
 
 if (file.exists(pathSA)) {
   studyArea <- qs::qread(pathSA)
@@ -68,7 +61,8 @@ if (file.exists(pathSA)) {
 listSACaribou <- studyArea$listSACaribou
 studyArea <- studyArea$studyArea
 
-gID <- gdriveSims[studyArea == studyAreaName & simObject == "resultsCaribou", gid]
+#gID <- gdriveSims[studyArea == studyAreaName & simObject == "resultsCaribou", gid]
+gID <- gid_resultsCaribou
 RUNS <- sprintf("run%02d", 1:nReps)
 climMods <- data.table(expand.grid(c("CanESM5", "CNRM-ESM2-1"), c("SSP370", "SSP585")))
 climMods[, climM := paste0(Var1, "_", Var2)]
@@ -81,17 +75,21 @@ YS <- seq(2011, 2091, by = 20)
 source("R/convertShpToRas.R")
 source("R/makeCaribouRSFAverageMapSameFolder.R")
 
+caribouPlotsDir <- file.path(Paths$outputPath, "caribouPlots")
+
 lapply(names(listSACaribou), function(SHP) {
   booSHP <- listSACaribou[[SHP]]
-  booRSF <- makeCaribouRSFAverageMapSameFolder(resultsFolder = file.path(dirname(Paths$outputPath), "caribouRSF_predictions"),
-                                               runs = RUNS,
-                                               runName = SHP,
-                                               climateModels = climMods,
-                                               outputsPath = Paths$outputPath,
-                                               shp = booSHP,
-                                               binningTable = binningTable,
-                                               initialYear = 2011,
-                                               lastYear = 2091)
+  booRSF <- makeCaribouRSFAverageMapSameFolder(
+    resultsFolder = file.path(dirname(Paths$outputPath), "caribouRSF_predictions"),
+    runs = RUNS,
+    runName = SHP,
+    climateModels = climMods,
+    outputsPath = Paths$outputPath,
+    shp = booSHP,
+    binningTable = binningTable,
+    initialYear = 2011,
+    lastYear = 2091
+  )
 
   meanPolys <- booRSF[["meanRSFPoly"]]
 
@@ -110,18 +108,16 @@ lapply(names(listSACaribou), function(SHP) {
                               "meanRSF", "sdRSF", "upperCI", "lowerCI",
                               "meanRSFall", "sdRSFall", "upperCIall", "lowerCIall")])
 
-  polyMeanName <- file.path(Paths$outputPath, paste0("meanRSFperPolySummary_", SHP, ".qs"))
+  polyMeanName <- file.path(caribouPlotsDir, paste0("meanRSFperPolySummary_", SHP, ".qs"))
   qs::qsave(x = sMP, file = polyMeanName)
 
   drive_upload(polyMeanName, path = as_id(gID))
-  drive_upload(file.path(Paths$outputPath, paste0("meanRSFperPolygon_", SHP, ".qs")), path = as_id(gID))
+  drive_upload(file.path(caribouPlotsDir, paste0("meanRSFperPolygon_", SHP, ".qs")), path = as_id(gID))
 })
 
 ################### Population Growth #################
 
 ### PLOTS
-
-caribouPlotsDir <- file.path(Paths$outputPath, "caribouPlots")
 
 source("R/mergePredictedCaribouTables.R")
 

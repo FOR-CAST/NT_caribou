@@ -12,14 +12,17 @@ cache_conn <- if (config::get("cachedb") == "sqlite") {
   stop("Unsupported cache database type '", config::get("cachedb"), "'")
 }
 
-maxMemory <- 5e+12
+maxLimit <- 20000 # for future; in MB
+maxMemory <- 5e+12 # for raster
 
 terra::terraOptions(tempdir = checkPath(file.path(scratchDir, "terra"), create = TRUE))
 raster::rasterOptions(default = TRUE)
 opts <- options(
   "encoding" = "UTF-8",
+  "future.globals.maxSize" = maxLimit*1024^2, ## we use ~6 GB for layers here
   "LandR.assertions" = FALSE,
   "LandR.verbose" = 1,
+  "NCONNECTIONS" = 120L,  ## R cannot exceed 125 connections; use fewer to be safe
   "rasterMaxMemory" = maxMemory,
   "rasterTmpDir" = file.path(scratchDir, "raster"),
   "reproducible.cachePath" = file.path(scratchDir, "cache"),

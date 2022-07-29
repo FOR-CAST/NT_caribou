@@ -6,26 +6,19 @@ source("01-packages.R")
 Require(c("caribouMetrics", "raster", "sf", "tictoc", "usefulFuns"))
 
 source("02-init.R")
+reupload <- FALSE
 usePrerun <- TRUE
 
-scratchDirOrig <- scratchDir
-source("03-paths.R")
-
-source("04-options.R")
-maxLimit <- 20000 # in MB
-options(
-  future.globals.maxSize = maxLimit*1024^2, ## we use ~6 GB for layers here
-  NCONNECTIONS = 120L  ## R cannot exceed 125 connections; use fewer to be safe
-)
-
-source("05-google-ids.R")
-
+climateGCMs <- c("CanESM5", "CNRM-ESM2-1")
+climateSSPs <- c("SSP370", "SSP585")
 nodeName <- Sys.info()[["nodename"]]
 studyAreaNames <- c("NT1_BCR6")
 wildlifeModules <- list("caribouPopGrowthModel", "caribouRSF_NT")
-climateGCMs <- c("CanESM5", "CNRM-ESM2-1")
-climateSSPs <- c("SSP370", "SSP585")
 
+scratchDirOrig <- scratchDir
+source("03-paths.R")
+source("04-options.R")
+source("05-google-ids.R")
 source("06-studyArea.R")
 
 source("R/rstCurrentBurnListGenerator_NT.R")
