@@ -8,8 +8,7 @@ defaultPaths <- list(
   cachePath = cacheDir,
   modulePath = "modules",
   inputPath = "inputs",
-  # outputPath = file.path("outputs", studyAreaName),
-  outputPath = file.path("outputs/NT1"), # TM: Changed to be able to deal with permission's problem
+  outputPath = file.path("outputs", studyAreaName),
   scratchPath = scratchDir
 )
 
