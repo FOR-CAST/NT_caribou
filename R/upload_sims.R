@@ -1,19 +1,32 @@
-#source("01-packages.R")
+source("01a-packages-libPath.R")
 
-library(Require)
-library(reproducible)
-library(googledrive)
+library("Require")
+Require(c("data.table", "googledrive", "purrr"))
+
+token <- Require::normPath(list.files(".", "western-boreal-initiative-.*[.]json")[1])
+haveToken <- isTRUE(length(token) == 1)
+
+if (haveToken) {
+  drive_auth(path = token)
+} else {
+  message(crayon::red("No Google service account token found. Trying user authentication..."))
+  drive_auth(email = "achubaty@for-cast.ca", use_oob = quickPlot::isRstudioServer())
+}
+
+message(crayon::silver("Authenticating as: "), crayon::green(drive_user()$emailAddress))
+
+
+## upload -------------------------------------------------------------------------------------
+
+sA <- studyAreaName <- "NT1_BCR6"
 
 source("05-google-ids.R")
 
-files2upload <- c(
-  list.files("outputs", "(CanESM5|CNRM-ESM2-1).*[.]tar.gz$", full.names = TRUE)
-)
+gid_results <- as_id(gdriveSims[studyArea == sA & simObject == "results", gid])
 
-m <- which(basename(files2upload) == "NT1_BCR6_CanESM5_SSP370_run01.tar.gz")
-lapply(files2upload[-c(1:m)], function(tarball) {
-  studyAreaName <- substr(basename(tarball), 1, X) ## TODO
-  gid_results <- gdriveSims[studyArea == studyAreaName & simObject == "results", gid]
-  retry(quote(drive_put(media = tarball, path = unique(as_id(gid_results)), name = basename(tarball))),
-        retries = 5, exponentialDecayBase = 2)
-})
+files2upload <- list.files("outputs", paste0(sA, "_(CanESM5|CNRM-ESM2-1).*[.]tar.gz$"), full.names = TRUE)
+files2upload <- set_names(files2upload, basename(files2upload))
+
+prevUploaded <- drive_ls(gid_results)
+toUpload <- files2upload[!(basename(files2upload) %in% prevUploaded$name)]
+uploaded <- map(toUpload, ~ drive_upload(.x, path = gid_results))
