@@ -1,8 +1,6 @@
-bringObjectTSqs <- function (path, rastersNamePattern) {
-
+bringObjectTSqs <- function(path, rastersNamePattern) {
   message(crayon::green(paste0("Looking for files in ", path,
-                               "\nUsing the following pattern(s): ", paste(rastersNamePattern,
-                                                                           sep = "\n"))))
+                               "\nUsing the following pattern(s): ", paste(rastersNamePattern, sep = "\n"))))
   filesToLoad <- grepMulti(x = list.files(path = path, full.names = TRUE),
                            patterns = rastersNamePattern)
   if (length(filesToLoad) > 1) {

@@ -1,10 +1,12 @@
+if (file.exists(".Renviron")) readRenviron(".Renviron")
+
 # source("01a-packages-libPath.R")
 source("01-packages.R")
-message("Using libPaths:\n", paste(.libPaths(), collapse = "\n"))
 
 Require(c("caribouMetrics", "raster", "sf", "tictoc", "usefulFuns"))
 
 source("02-init.R")
+usePrerun <- TRUE
 
 scratchDirOrig <- scratchDir
 source("03-paths.R")
@@ -24,16 +26,13 @@ wildlifeModules <- list("caribouPopGrowthModel", "caribouRSF_NT")
 climateGCMs <- c("CanESM5", "CNRM-ESM2-1")
 climateSSPs <- c("SSP370", "SSP585")
 
+source("06-studyArea.R")
 
-# source('06-studyArea.R')
-#TODO source 06 Still not working until the end, but generated the RTM, so needs fixing
-
-source("~/GitHub/NT_caribou/R/rstCurrentBurnListGenerator_NT.R")
-source("~/GitHub/NT_caribou/R/makeStudyArea_NT_caribou.R")
+source("R/rstCurrentBurnListGenerator_NT.R")
+source("R/makeStudyArea_NT_caribou.R")
 
 useLockFile <- TRUE
-REPS <- c("run01", "run02", "run03", "run04", "run05", "run06", "run07",
-           "run08", "run09", "run10")
+REPS <- sprintf("run%02d", 1:nReps)
 
 for (RP in REPS) {
   for (CS in climateGCMs) {
@@ -41,23 +40,7 @@ for (RP in REPS) {
       for (P in studyAreaNames) {
         fls <- list.files(file.path("outputs", P, "posthoc"))
         if (length(fls) != 0) {
-          ## TODO: is this same as the grepMulti in usefulFuns? conflicts???
-          ## # TM: No, I just wanted to avoid loading the package for only this function.
-          ## If it is working, though, I don't need it.
-          # grepMulti <- function(x, patterns, unwanted = NULL) {
-          #   rescued <- sapply(x, function(fun) all(sapply(X = patterns, FUN = grepl, fun)))
-          #   recovered <- x[rescued]
-          #   if (!is.null(unwanted)) {
-          #     discard <- sapply(recovered, function(fun) all(sapply(X = unwanted, FUN = grepl, fun)))
-          #     afterFiltering <- recovered[!discard]
-          #     return(afterFiltering)
-          #   } else {
-          #     return(recovered)
-          #   }
-          # }
-          allFls <- grepMulti(fls,
-                              patterns = c(RP, CS, SS, P),
-                              unwanted = ".aux.xml")
+          allFls <- grepMulti(fls, patterns = c(RP, CS, SS, P), unwanted = ".aux.xml")
           if (length(allFls) == 115*5) {
             message(crayon::green(paste0("Simulations done for:", paste(P, SS, CS, RP, collapse = " "))))
             next
@@ -73,7 +56,7 @@ for (RP in REPS) {
 
         do.call(setPaths, posthocPaths)
 
-        if (useLockFile){
+        if (useLockFile) {
           ## if a study area is already complete, skip it and do next one
           donefile <- file.path(posthocPaths[["outputPath"]], paste0("00-DONE_",
                                                                      paste(P, SS,
@@ -176,7 +159,8 @@ for (RP in REPS) {
                           15:17, # Cropland, barren and Urban
                           19) # Ice and snow
 
-        landcoverMap <- Cache(LandR::prepInputsLCC, destinationPath = posthocPaths[["inputPath"]],
+        landcoverMap <- Cache(LandR::prepInputsLCC,
+                              destinationPath = posthocPaths[["inputPath"]],
                               studyArea = studyArea,
                               rasterToMatch = rasterToMatch,
                               filename2 = paste0("LCC_", Province, ".tif"),
@@ -248,7 +232,7 @@ for (RP in REPS) {
 
         # Reset input paths to the folder where simulation outputs are
         posthocPaths[["inputPath"]] <- file.path("outputs", runName)
-        options("reproducible.destinationPath" = posthocPaths[["outputsPath"]]) # TRYING TO GET AROUND ANNOYING PERMISSION PROBLEMS
+        options("reproducible.destinationPath" = posthocPaths[["outputsPath"]])
         rstCurrentBurnList <- rstCurrentBurnListGenerator_NT(pathInputs = posthocPaths[["inputPath"]])
 
         # Add objects
@@ -270,8 +254,7 @@ for (RP in REPS) {
           "listSACaribou" = listSACaribou,
           "NT1shapefile" = studyArea)
 
-        outputsBoo <- data.frame(objectName = c("predictedCaribou",
-                                                "disturbances"),
+        outputsBoo <- data.frame(objectName = c("predictedCaribou", "disturbances"),
                                  file = c(paste0("predictedCaribou_Year2091_", runName),
                                           paste0("disturbances_Year2091_", runName)),
                                  saveTime = Times$end)

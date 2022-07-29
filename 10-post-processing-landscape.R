@@ -1,7 +1,6 @@
 if (file.exists(".Renviron")) readRenviron(".Renviron")
 
 years <- c(2011, 2100)
-Nreps <- 10 ## adjust as needed
 studyAreaNames <- c("NT1_BCR6")
 climateScenarios <- c("CanESM5_SSP370", "CanESM5_SSP585", "CNRM-ESM2-1_SSP370", "CNRM-ESM2-1_SSP585")
 
@@ -32,7 +31,7 @@ parallel::mclapply(studyAreaNames, function(sAN) {
       climateScenarios = climateScenarios,
       simOutputPath = dirname(defaultPaths$outputPath), ## "outputs"
       studyAreaNames = sAN,
-      reps = Nreps,
+      reps = nReps,
       upload = doUpload,
       year = years
     ),
@@ -40,7 +39,7 @@ parallel::mclapply(studyAreaNames, function(sAN) {
       climateScenarios = climateScenarios,
       simOutputPath = dirname(defaultPaths$outputPath), ## "outputs"
       studyAreaNames = sAN,
-      reps = Nreps,
+      reps = nReps,
       upload = doUpload
     )
   )
