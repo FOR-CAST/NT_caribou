@@ -22,7 +22,7 @@ knitr::opts_chunk$set(
 
 if (file.exists(".Renviron")) readRenviron(".Renviron")
 
-source("01a-packages-libPath.R")
+source("01-packages.R")
 
 if (!"Require" %in% rownames(installed.packages())) {
   remotes::install_github("PredictiveEcology/Require@development")
@@ -31,16 +31,19 @@ if (!"Require" %in% rownames(installed.packages())) {
 }
 library("Require")
 
+source("02-init.R")
+source("03-paths.R")
+
+do.call(setPaths, summaryPaths)
+
 Require(c("fs", "knitr", "qs"))
 
-studyAreaName <- "NT1" #TODO IF THE COMMIT 01e7cc6a00d6a34f956e9efa278735587957994c is reversed, data needs to be moved and this needs to be updated! ~TM
-
 nwt_data_dirs <- list(
-  landscape_raw = file.path("outputs/"), #TODO Not sure this needs to list all individual folders with results? ~TM
-  landscape = file.path("outputs/"), # TODO: Alex to update this once all landscape summaries have been made
-  caribouRSF_raw = file.path("outputs", studyAreaName, "summary", "caribouRSF_predictions"),  ## raw results (.tif)
-  caribouPopGrowth_raw = file.path("outputs", studyAreaName, "posthoc"),  ## raw results (.tif)
-  caribou = file.path("outputs", studyAreaName, "summary", "caribouPlots")
+  landscape_raw = Paths$outputPath, #TODO Not sure this needs to list all individual folders with results? ~TM
+  landscape = Paths$outputPath, # TODO: Alex to update this once all landscape summaries have been made
+  caribouRSF_raw = file.path(Paths$outputPath, "caribouRSF_predictions"),  ## raw results (.tif)
+  caribouPopGrowth_raw = file.path(dirname(Paths$outputPath), "posthoc"),  ## raw results (.tif)
+  caribou = file.path(Paths$outputPath, "caribouPlots")
 )
 stopifnot(dir.exists(unlist(nwt_data_dirs))) # Use base R instead of xfun package
 
@@ -79,15 +82,27 @@ Our simulation experiments were designed to contrast climate-sensitive and non-c
 
 Each simulation run produced the following files, where `YYYY` is the year in question:
 
-- yearly aboveground net primary productivity (ANPP) maps (`ANPPMap_YYYY_yearYYYY.tif`);
-- yearly wildfire burn maps (`burnMap_YYYY_yearYYYY.tif`);
+- yearly aboveground net primary productivity (ANPP) maps:  
+    --> `ANPPMap_YYYY_yearYYYY.tif`
+- yearly wildfire burn maps:
+    --> `burnMap_YYYY_yearYYYY.tif`
 - wildfire burn summary for year 2100, containing information on all simulated fires 
-with total area burned for all years (`burnSummary_year2100.qs`);
-- yearly wildfire of simulated burned pixels for all years (`    rstCurrentBurn_YYYY_yearYYYY.tif`);
-- yearly vegetation (tree only) cohort data objects (`cohortData_YYYY_yearYYYY.qs`), from which cohort age, aboveground biomass, and species composition can be extracted using the accompanying map (`pixelGroupMap_YYYY_yearYYYY.tif`; matched by pixelGroup);
-- wildfire ignition, escape, and spread model predictions for all years (`fireSense_IgnitionPredicted_YYYY_yearYYYY.tif`, `fireSense_EscapePredicted_YYYY_yearYYYY.tif`, `fireSense_SpreadPredicted_YYYY_yearYYYY.tif`);
-- yearly vegetation (tree) mortality maps (`mortalityMap_YYYY_yearYYYY.tif`);
-- yearly simulated vegetation biomass maps (`simulatedBiomassMap_YYYY_yearYYYY.tif`).
+with total area burned for all years:  
+    --> `burnSummary_year2100.qs`
+- yearly wildfire of simulated burned pixels for all years:  
+    --> `rstCurrentBurn_YYYY_yearYYYY.tif`
+- yearly vegetation (tree only) cohort data objects,  
+    --> `cohortData_YYYY_yearYYYY.qs`
+from which cohort age, aboveground biomass, and species composition can be extracted using the accompanying map:  
+    --> `pixelGroupMap_YYYY_yearYYYY.tif` (matched by pixelGroup)
+- wildfire ignition, escape, and spread model predictions for all years:  
+    --> `fireSense_IgnitionPredicted_YYYY_yearYYYY.tif`  
+    --> `fireSense_EscapePredicted_YYYY_yearYYYY.tif`  
+    --> `fireSense_SpreadPredicted_YYYY_yearYYYY.tif`  
+- yearly vegetation (tree) mortality maps:  
+    --> `mortalityMap_YYYY_yearYYYY.tif`
+- yearly simulated vegetation biomass maps:  
+    --> `simulatedBiomassMap_YYYY_yearYYYY.tif`
 
 #### Raw outputs:
 
@@ -118,28 +133,42 @@ of climate-driven landscape change [as described in @stewart; available [here](h
 
 We forecast suitable habitat for Boreal woodland caribou (_Rangifer tarandus caribou_) across the union of the three sets of polygons containing Northwest Territories' caribou ranges. We generated the following products, where `SHP` stands for the shapefile used for the maps (RangePlanRegions, GNWT_NT1_range, Revised_Study_Areas), `YYYY` stands for the year (2011, 2031, 2051, 2071 or 2091), `RR` stands for the replicate number (01 to 10), `CLIMMOD` stands for the climate model (CanESM5 or CNRM-ESM2-1) and `XXX` stands for the SSP (370 or 585) : 
  
-- bi-decadal relative selection (RSF) forecast for each climate model and replicate (`NT1_BCR6_CLIMMOD_SSPXXX_runRR_relativeSelectioncaribouRSF_NT_YearYYYY.tif`);
-- bi-decadal relative selection (RSF) forecast uncertainty (in the form of standard error) for each climate model and replicate (`NT1_BCR6_CLIMMOD_SSPXXX_runRR_relativeSelectionUncertaincaribouRSF_NT_YearYYYY.tif`);
-- For each shapefile:
-  - map of the average difference between first and last year across:
-     - all climate models and SSP (`averageDifference_SHP_allScenarios.png`)
-     - each climate models and SSP (`averageDifference_SHP_NT1_BCR6_CLIMMOD_SSPXXX.png`)
-  - map of the SD difference first and last year across:
-     - all climate models and SSP (`sdDifference_SHP_allScenarios.png`)
-     - each climate models and SSP (`sdDifference_SHP_NT1_BCR6_CLIMMOD_SSPXXX.png`)
-  - Table of mean, standard deviation (SD) and confidence interval (CI) of binned RSF values for each polygon within the shapefile, climate model and replicate within the shapefile (`meanRSFperPolygon_SHP.qs`)
-  - Summarized table with mean, standard deviation (SD) and confidence interval (CI) of binned RSF values for each polygon within the shapefile, both for all and across climate model, across replicates (`meanRSFperPolySummary_SHP.qs`)
+- bi-decadal relative selection (RSF) forecast for each climate model and replicate:  
+      --> `NT1_BCR6_CLIMMOD_SSPXXX_runRR_relativeSelectioncaribouRSF_NT_YearYYYY.tif`
+- bi-decadal relative selection (RSF) forecast uncertainty (in the form of standard error) for each climate model and replicate:  
+      --> `NT1_BCR6_CLIMMOD_SSPXXX_runRR_relativeSelectionUncertaincaribouRSF_NT_YearYYYY.tif`
+- For each shapefile:  
+  - map of the average difference between first and last year across:  
+     - all climate models and SSP:  
+       --> `averageDifference_SHP_allScenarios.png`  
+     - each climate models and SSP:  
+       --> `averageDifference_SHP_NT1_BCR6_CLIMMOD_SSPXXX.png`  
+  - map of the SD difference first and last year across:  
+     - all climate models and SSP:  
+       --> `sdDifference_SHP_allScenarios.png`  
+     - each climate models and SSP:  
+       --> `sdDifference_SHP_NT1_BCR6_CLIMMOD_SSPXXX.png`  
+  - Table of mean, standard deviation (SD) and confidence interval (CI) of binned RSF values for each polygon within the shapefile, climate model and replicate within the shapefile:
+      --> `meanRSFperPolygon_SHP.qs`
+  - Summarized table with mean, standard deviation (SD) and confidence interval (CI) of binned RSF values for each polygon within the shapefile, both for all and across climate model, across replicates:  
+      --> `meanRSFperPolySummary_SHP.qs`
 
 ### Boreal Population Growth
 
 We also simulated demographic parameters for all polygons within all three shapefiles. We generated the following products, where `SHP` stands for the shapefile used for the maps (RangePlanRegions, GNWT_NT1_range, Revised_Study_Areas), `YYYY` stands for the year (2011, 2031, 2051, 2071 or 2091), `RR` stands for the replicate number (01 to 10), `CLIMMOD` stands for the climate model (CanESM5 or CNRM-ESM2-1) and `XXX` stands for the SSP (370 or 585) : 
 
-- layers used for population growth calculation per climate model and replicate (`caribouLayers_yearYYYY_NT1_BCR6_CLIMMOD_SSPXXX_runRR.tif`)
-- disturbance summary at year 2091 (which contains all disturbances for all other years), per climate model and replicate (`disturbances_Year2091_NT1_BCR6_CLIMMOD_SSPXXX_runRR_year2091.rds`).
-- predicted caribou values (lambda, recruitment and adult female mortality) at year 2091 (which contains values for all other years), per climate model and replicate (`predictedCaribou_Year2091_NT1_BCR6_CLIMMOD_SSPXXX_runRR_year2091.rds`).
-- caribou population demographics plots per polygon per shapefile, showing increasing levels of uncertainty (5 to 85 quantiles; colored bands) using climate models and replicates as uncertainty measures (`caribou_SHP_allCM_Johnson_Johnson.png`) 
-- caribou population demographics table (summary) per polygon per shapefile, replicate and climate model (`populationGrowthTable.csv`) 
-- disturbance table (summary) per polygon per shapefile, replicate and climate model (`disturbanceTable.csv`) 
+- layers used for population growth calculation per climate model and replicate:  
+    --> `caribouLayers_yearYYYY_NT1_BCR6_CLIMMOD_SSPXXX_runRR.tif`
+- disturbance summary at year 2091 (which contains all disturbances for all other years), per climate model and replicate:  
+    --> `disturbances_Year2091_NT1_BCR6_CLIMMOD_SSPXXX_runRR_year2091.rds`
+- predicted caribou values (lambda, recruitment and adult female mortality) at year 2091 (which contains values for all other years), per climate model and replicate:  
+    --> `predictedCaribou_Year2091_NT1_BCR6_CLIMMOD_SSPXXX_runRR_year2091.rds`
+- caribou population demographics plots per polygon per shapefile, showing increasing levels of uncertainty (5 to 85 quantiles; colored bands) using climate models and replicates as uncertainty measures:  
+    --> `caribou_SHP_allCM_Johnson_Johnson.png`
+- caribou population demographics table (summary) per polygon per shapefile, replicate and climate model:  
+    --> `populationGrowthTable.csv` 
+- disturbance table (summary) per polygon per shapefile, replicate and climate model:  
+    --> `disturbanceTable.csv`  
 
 #### Raw outputs:
 
@@ -154,16 +183,9 @@ Total archive size: `r paste0(sum(caribouRSF_raw$size, caribouPopGrowth_raw$size
 
 #### Summarized layers:
 
-```{r NWT-file-info-boo}
-allFilesLandscape_NWT <- subset(fs::dir_info(nwt_data_dirs$landscape, recurse = TRUE), type == "file")
-allFilesLandscape_NWT$ext <- tools::file_ext(allFilesLandscape_NWT$path)
-```
-
-
 ```{r NWT-file-info-caribou}
 caribou <- subset(dir_info(nwt_data_dirs$caribou, recurse = TRUE), type == "file")
 caribou$ext <- tools::file_ext(caribou$path)
-caribou <- basename(grep("CanESM2_run1", caribou$path, value = TRUE))
 ```
 
 Total archive size: `r paste0(sum(caribou$size), "B")`.
