@@ -47,7 +47,7 @@ if (any(overwriteCalc,
         diffRas <- raster::raster(diffRasName)
 
       } else {
-        fld <- file.path(resultsFolder, paste0(cm, "_", RUN))
+        fld <- paste0(cm, "_", RUN)
         fRasName <- usefulFuns::grepMulti(list.files(resultsFolder,
                                                      recursive = TRUE,
                                                      full.names = TRUE),
@@ -154,7 +154,7 @@ if (any(overwriteCalc,
     names(averageCM) <- "averageDifference"
     names(sdCM) <- "sdDifference"
     cmStk <- stack(averageCM, sdCM)
-    # if (paste0(runName, "_", cm) == "NT1_BCR6_CanESM5_SSP585" & RUN == "run02") browser()
+
     pathSHP <- file.path(outputsPath, paste0("RSF_", runName,".shp"))
 
     if (!file.exists(pathSHP)){
@@ -168,7 +168,7 @@ if (any(overwriteCalc,
 
     bothMaps <- rbindlist(lapply(names(cmStk), function(layName){
 
-      pngPath <- file.path(outputsPath, paste0(layName, "_", cm,".png"))
+      pngPath <- file.path(outputsPath, paste0(layName, "_", runName, "_", cm,".png"))
 
       if (layName == "averageDifference"){
         # round these up to the integer
@@ -293,7 +293,7 @@ if (any(overwriteCalc,
   shpLoaded <- rgdal::readOGR(pathSHP)
   bothMapsAllCS <- rbindlist(lapply(X = names(cmStk), FUN = function(layName){
 
-    pngPath <- file.path(outputsPath, paste0(layName, "_allScenarios.png"))
+    pngPath <- file.path(outputsPath, paste0(layName, "_", runName, "_allScenarios.png"))
 
     if (layName == "averageDifference"){
       # round these up to the integer
@@ -377,10 +377,10 @@ if (any(overwriteCalc,
   finalMapsPath <- rbindlist(list(allRepsFilepath, bothMapsAllCS))
   meanRSFPoly <- rbindlist(lapply(booMaps, `[[`, "meanRSFPoly"))
 
-  write.csv(x = meanRSFPoly,
+  qs::qsave(x = meanRSFPoly,
             file = meanRSFPolyFile)
 
-  write.csv(x = finalMapsPath,
+  qs::qsave(x = finalMapsPath,
             file = finalMapsPathFile)
 
 } else {

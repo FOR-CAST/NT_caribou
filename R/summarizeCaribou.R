@@ -32,15 +32,6 @@ climateSSPs <- c("SSP370", "SSP585")
 
 do.call(setPaths, posthocPaths)
 
-SpaDES.core::setPaths(cachePath = Paths$cachePath,
-                      outputPath = checkPath(file.path(Paths$outputPath,
-                                                       "caribouPlots"),
-                                             create = TRUE))
-# Make Caribou RSF map
-# This will be a difference (2100-2011) map, averaged across all reps
-# and then across all simulations. Need also to summarize by polygons and
-# return in a table
-
 binningTable <- Cache(prepInputs,
                       targetFile = "AllYear_noMac_SelectionRatios_20210120.csv",
                       url = "https://drive.google.com/file/d/1KXNlCN9iBLcPBcEge469fU9Kvws2trAc",
@@ -77,9 +68,7 @@ if (file.exists(pathSA)) {
 listSACaribou <- studyArea$listSACaribou
 studyArea <- studyArea$studyArea
 
-# Google Drive Outputs Folder
-
-gID <- "1IpC_u5c7Mluvqdxzk3pue5NFaBHyY6A6"
+gID <- "1IpC_u5c7Mluvqdxzk3pue5NFaBHyY6A6" # Google Drive Outputs Folder
 RUNS <- c(paste0("run0", 1:9), "run10")
 climMods <- data.table(expand.grid(c("CanESM5", "CNRM-ESM2-1"), c("SSP370", "SSP585")))
 climMods[, climM := paste0(Var1, "_", Var2)]
@@ -89,6 +78,11 @@ YS <- seq(2011, 2091, by = 20)
 
 ################### RSF #################
 
+# Make Caribou RSF map
+# This will be a difference (2100-2011) map, averaged across all reps
+# and then across all simulations. Need also to summarize by polygons and
+# return in a table
+
 lapply(names(listSACaribou), function(SHP){
   booSHP <- listSACaribou[[SHP]]
 
@@ -96,11 +90,11 @@ Require("RColorBrewer")
 source('R/convertShpToRas.R')
 source('R/makeCaribouRSFAverageMapSameFolder.R')
 
-booRSF <- makeCaribouRSFAverageMapSameFolder(resultsFolder = file.path(dirname(Paths$outputPath), "predictions"),
+booRSF <- makeCaribouRSFAverageMapSameFolder(resultsFolder = file.path(dirname(Paths$outputPath), "summary", "caribouRSF_predictions"),
                                              runs = RUNS,
                                              runName = SHP,
                                              climateModels = climMods,
-                                             outputsPath = Paths$outputPath,
+                                             outputsPath = file.path(dirname(Paths$outputPath), "summary", "caribouPlots"),
                                              shp = booSHP,
                                              binningTable = binningTable,
                                              initialYear = 2011,
@@ -123,14 +117,15 @@ sMP <- unique(meanPolys[, c("Area","climateModel",
                             "meanRSF", "sdRSF", "upperCI", "lowerCI",
                             "meanRSFall", "sdRSFall", "upperCIall","lowerCIall")])
 
-polyMeanName <- file.path(Paths$outputPath, paste0("meanRSFperPolySummary_",
-                                                   SHP,".qs"))
+polyMeanName <- file.path(dirname(Paths$outputPath), "summary", "caribouPlots",
+                          paste0("meanRSFperPolySummary_", SHP,".qs"))
 qs::qsave(x = sMP, file = polyMeanName)
 
 Require("googledrive")
 drive_upload(polyMeanName,
              path = as_id(gID))
-drive_upload(file.path(Paths$outputPath, paste0("meanRSFperPolygon_", SHP,".qs")),
+drive_upload(file.path(dirname(Paths$outputPath), "summary", "caribouPlots",
+                       paste0("meanRSFperPolygon_", SHP,".qs")),
              path = as_id(gID))
 })
 
@@ -143,14 +138,15 @@ drive_upload(file.path(Paths$outputPath, paste0("meanRSFperPolygon_", SHP,".qs")
 
 source("R/mergePredictedCaribouTables.R")
 
-caribouPopulationGrowthTable <- mergePredictedCaribouTables(pathToFiles = dirname(Paths$outputPath),
+caribouPopulationGrowthTable <- mergePredictedCaribouTables(pathToFiles = file.path(dirname(Paths$outputPath), "posthoc"),
                                                             climateScenarios = climMods,
                                                             yr = YS,
                                                             runs = RUNS,
                                                             studyAreaName = studyAreaName,
                                                             herdSHP = SHP)
 
-popGTB <- file.path(Paths$outputPath, "populationGrowthTable.csv")
+popGTB <- file.path(dirname(Paths$outputPath), "summary", "caribouPlots",
+                    "populationGrowthTable.csv")
 
 write.csv(x = caribouPopulationGrowthTable,
           file = popGTB)
@@ -164,13 +160,14 @@ polIgn <- if (SHP == "Revised_Study_Areas") "Cameron Hills" else NULL
 source('R/plotCaribouPopGrowthMSSD.R')
 # lapply over all areas
 plotCaribou <- plotCaribouPopGrowthMSSD(caribouPopulationGrowthTable = caribouPopulationGrowthTable,
-                                        outputFolder = Paths$outputPath,
+                                        outputFolder = file.path(dirname(Paths$outputPath), "summary", "caribouPlots"),
                                         whichPolysToIgnore = polIgn,
                                         valueOfInterest = seq(5, 85, by = 20),
                                         lims = c(0.8, 1.2),
                                         alphy = 0.07)
 library("googledrive")
-fl <- list.files(path = Paths$outputPath, pattern = "caribou_", full.names = TRUE)
+fl <- list.files(path = dirname(Paths$outputPath), "summary", "caribouPlots",
+                 pattern = "caribou_", full.names = TRUE)
 lapply(fl, drive_upload, path = as_id(gID))
 
 ################### Population Growth #################
@@ -178,7 +175,7 @@ lapply(fl, drive_upload, path = as_id(gID))
 
 ################### Disturbances #################
 
-allDist <- list.files(dirname(Paths$outputPath), pattern = "disturbances_Year2091",
+allDist <- list.files(Paths$outputPath, pattern = "disturbances_Year2091",
                       full.names = TRUE, recursive = TRUE)
 
 distTable <- rbindlist(lapply(climMods, function(cM){
@@ -208,7 +205,7 @@ distTable <- rbindlist(lapply(climMods, function(cM){
 
 }))
 
-dTablePath <- file.path(Paths$outputPath,
+dTablePath <- file.path(file.path(dirname(Paths$outputPath), "summary", "caribouPlots"),
                                   "disturbanceTable.csv")
 
 write.csv(x = distTable, file = dTablePath)
@@ -218,6 +215,10 @@ drive_upload(dTablePath,
              path = as_id(gID))
 
 ################### Disturbances #################
+
+
+#TODO ALEX TO REVISE BELOW! <~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ AC
+
 
 ################### Vegetation #################
 
