@@ -39,63 +39,66 @@ if (!require("Require", quietly = TRUE)) {
   library("Require")
 }
 Require(c("fs", "knitr", "qs"))
+studyAreaName <- "NT1" #TODO IF THE COMMIT 01e7cc6a00d6a34f956e9efa278735587957994c is reversed, data needs to be moved and this needs to be updated! ~TM
+
 nwt_data_dirs <- list(
-  landscape_raw = file.path("/mnt/wbi_data/NWT/outputs/PAPER_EffectsOfClimateChange/SIMULATION"), ## raw results
-  landscape = file.path("/mnt/wbi_data/NWT/outputs/PAPER_EffectsOfClimateChange/posthoc"),
-  caribou = file.path("/mnt/wbi_data/NWT/outputs/landscapeRuns/LandR.CS_fS"),
-  birds_raw = file.path("/mnt/wbi_data/NWT/outputs/PAPER_EffectsOfClimateChange/SIMULATION"), ## raw results
-  birds = file.path("/mnt/wbi_data/NWT/outputs/PAPER_EffectsOfClimateChange/posthoc")
+  landscape_raw = file.path("outputs/"), #TODO Not sure this needs to list all individual folders with results? ~TM
+  landscape = file.path("outputs/"), # TODO: Alex to update this once all landscape summaries have been made
+  caribouRSF_raw = file.path("outputs", studyAreaName, "summary", "caribouRSF_predictions"),  ## raw results (.tif)
+  caribouPopGrowth_raw = file.path("outputs", studyAreaName, "posthoc"),  ## raw results (.tif)
+  caribou = file.path("outputs", studyAreaName, "summary", "caribouPlots")
 )
-stopifnot(dir_exists(unlist(nwt_data_dirs)))
-wbi_data_dirs <- list(
-  landscape_raw = file.path("/mnt/wbi_data/WBI_forecasts/outputs"), ## raw results
-  landscape = file.path("/mnt/wbi_data/WBI_forecasts/outputs"), ## TODO: update this
-  caribou = file.path("/mnt/wbi_data/WBI_forecasts/outputs"), ## TODO: update this
-  birds = file.path("/mnt/wbi_data/WBI_forecasts/outputs") ## TODO: update this
-)
-stopifnot(dir_exists(unlist(wbi_data_dirs)))
-dataDir <- file.path("~/GitHub/WBI_forecasts/data_summaries/data")
-figsDir <- checkPath(file.path("~/GitHub/WBI_forecasts/data_summaries/figures"), create = TRUE)
-outputDir <- checkPath(file.path("~/GitHub/WBI_forecasts/data_summaries/outputs"), create = TRUE)
+stopifnot(dir.exists(unlist(nwt_data_dirs))) # Use base R instead of xfun package
 ```
 
 ## Overview
 
-The Western Boreal Initiative (WBI) represents a spatial expansion and diversification of forest values from a pilot project in Northwest Territories [@micheletti2021; @stewart].
-The expanded study area covers four boreal Bird Conservation Regions (BCRs: 4, 6, 7 and 8) within British Columbia, Alberta, Saskatchewan, Manitoba, Yukon, Northwest Territories and Nunavut.
+This document summarizes the data product deliverables quoted for ENR-GNWT as described in the 
+tasks below:  
 
-![](https://github.com/PredictiveEcology/WBI_studyAreas/raw/main/figures/WBI_studyArea_gg.png)
+1. Landscape simulations (5 replicates for each of the 3 CMIP6 climate scenarios) for the period between 2011 and 2100, followed by summarizing wildfire results using 3 different sets of polygons contained within the NT1 caribou management area.
 
-This document summarizes the current availability of data products (outputs) from several modelling components, for the NWT pilot project and the expanded WBI project (expected completion March 31, 2022). 
+2. Simulated caribou population growth using landscape simulations described in 1, followed by summarizing results per polygon (table of raw results).
+
+3. Simulated caribou resource selection using landscape simulations described in 1, followed by summarizing results per polygon (table of raw results, maps of change from 2021 to 2100, and
+average and deviance across replicates and climate scenarios as uncertainty).
+
 All data products and modules have been developed using the PERFICT approach as outlined in McIntire et al. [-@mcintire_perfict_2022], which enables them to be part of update cycles as needed going forward.
 
-## Pilot project outputs (NWT)
+### Changes from the expected deliverables  
 
-### Landscape simulations
+To reduce uncertainty, we have increased the number of replicates from 5 to 10, and the climate scenarios from 3 to 4 (two GMC's -- CanESM5 and CNRM-ESM2-1 -- and 2 SSPs -- 370 and 585), which represent the most likely climate scenarios to be realized. Moreover, to ensure compatibility with the time steps proposed for caribou (10 year period), the last simulation performed for both RSF and population growth was 2091, not 2100 (as we start the simulations in 2011).
 
-Our simulation experiments were designed to contrast climate-sensitive and non-climate sensitive models for tree growth and mortality, in addition to wildfire from 2011-2100 [Table 2, @micheletti2021].
-Simulations used either a climate-sensitive vegetation model (LandR.CS) or a non-climate-sensitive version (LandR), together with either a climate-sensitive wildfire model (fireSense) or a non-climate-sensitive version (SCFM).
+### Opening files  
 
-Each simulation run produced the following files:
+Please note that `tif` files can be opened using the `raster` package in `R` or 
+imported to a GIS software (i.e., ArcGIS, QGIS). On the other hand, `qs` files need to 
+be opened in `R` using the `qs` library (`qs::qread()`), but can be saved in `R` as a `.csv` 
+file and opened in `Excel`. We caution, however, that most of these files are very large due 
+to the extent of the study area and one might face software limitations when converting 
+these objects to an Excel compatible format. 
 
-- decadal aboveground net primary productivity (ANPP) maps (`.rds`);
-- decadal wildfire burn maps (`.rds`);
-- wildfire burn summaries for years 2011, 2056, 2100 (`.rds`);
-- decadal vegetation (tree only) cohort data objects (`.rds`), from which cohort age, aboveground biomass, and species composition can be extracted;
-- wildfire ignition, escape, and spread model predictions for years 2011, 2056, 2100 (`.rds`);
-- decadal vegetation (tree) mortality maps (`.rds`);
-- decadal simulated vegetation biomass maps (`.rds`).
+## Landscape simulations
+
+Our simulation experiments were designed to contrast climate-sensitive and non-climate sensitive models for tree growth and mortality, in addition to wildfire from 2011-2100 [Table 2, @micheletti2021]. Simulations used a climate-sensitive vegetation model (LandR.CS), together with a climate-sensitive wildfire model (fireSense).
+
+Each simulation run produced the following files, where `YYYY` is the year in question:
+
+- yearly aboveground net primary productivity (ANPP) maps (`ANPPMap_YYYY_yearYYYY.tif`);
+- yearly wildfire burn maps (`burnMap_YYYY_yearYYYY.tif`);
+- wildfire burn summary for year 2100, containing information on all simulated fires 
+with total area burned for all years (`burnSummary_year2100.qs`);
+- yearly wildfire of simulated burned pixels for all years (`    rstCurrentBurn_YYYY_yearYYYY.tif`);
+- yearly vegetation (tree only) cohort data objects (`cohortData_YYYY_yearYYYY.qs`), from which cohort age, aboveground biomass, and species composition can be extracted using the accompanying map (`pixelGroupMap_YYYY_yearYYYY.tif`; matched by pixelGroup);
+- wildfire ignition, escape, and spread model predictions for all years (`fireSense_IgnitionPredicted_YYYY_yearYYYY.tif`, `fireSense_EscapePredicted_YYYY_yearYYYY.tif`, `fireSense_SpreadPredicted_YYYY_yearYYYY.tif`);
+- yearly vegetation (tree) mortality maps (`mortalityMap_YYYY_yearYYYY.tif`);
+- yearly simulated vegetation biomass maps (`simulatedBiomassMap_YYYY_yearYYYY.tif`).
 
 #### Raw outputs:
 
 ```{r NWT-file-info-landscape-raw}
-allFilesLandscapeRaw_NWT <- subset(dir_info(nwt_data_dirs$landscape_raw, recurse = TRUE), type == "file")
+allFilesLandscapeRaw_NWT <- subset(fs::dir_info(nwt_data_dirs$landscape_raw, recurse = TRUE), type == "file")
 allFilesLandscapeRaw_NWT$ext <- tools::file_ext(allFilesLandscapeRaw_NWT$path)
-#unique(allFilesLandscapeRaw_NWT$ext)
-# png(file.path(figsDir, "NWT_file_size_hist_landscape_raw.png"), height = 800, width = 800)
-# hist(log(allFilesLandscapeRaw_NWT$size), xlab = "log(filesize)")
-# dev.off()
-# hist(log(allFilesLandscapeRaw_NWT$size), xlab = "log(filesize)")
 ```
 
 Total archive size: `r paste0(sum(allFilesLandscapeRaw_NWT$size), "B")`.
@@ -103,339 +106,113 @@ Total archive size: `r paste0(sum(allFilesLandscapeRaw_NWT$size), "B")`.
 #### Summarized layers:
 
 ```{r NWT-file-info-landscape}
-allFilesLandscape_NWT <- subset(dir_info(nwt_data_dirs$landscape, recurse = TRUE), type == "file")
+allFilesLandscape_NWT <- subset(fs::dir_info(nwt_data_dirs$landscape, recurse = TRUE), type == "file")
 allFilesLandscape_NWT$ext <- tools::file_ext(allFilesLandscape_NWT$path)
-#unique(allFilesLandscape_NWT$ext)
-# png(file.path(figsDir, "NWT_file_size_hist_landscape.png"), height = 800, width = 800)
-# hist(log(allFilesLandscape_NWT$size), xlab = "log(filesize)")
-# dev.off()
-# hist(log(allFilesLandscape_NWT$size), xlab = "log(filesize)")
 ```
 
 Total archive size: `r paste0(sum(allFilesLandscape_NWT$size), "B")`.
 
-### Boreal Caribou simulations
+All landscape simulation summary products can be find at <https://drive.google.com/drive/u/0/folders/1t6032ggUC__jzaJs5H39LW6iFfrqlK_T>
 
-We forecast suitable habitat for boreal woodland caribou (_Rangifer tarandus caribou_) across the union of NT1 herd range and BCR 6 in Northern Canada (mostly Taiga Plains region).
-We also simulated demographic parameters for five geographical areas. For both models, we simulated changes across 90 years of climate-driven landscape change [described in @stewart; available [here](https://drive.google.com/file/d/1NHzLDCbfEr2x5J3eD59r7uojrE-VN1y9/)].
+## Boreal Caribou simulations
 
-We have simulated landscape attributes for each caribou monitoring area (Dehcho North, Dehcho South, GSA North, GSA South, Hay River Lowlands), and each CIMP5 climate models (GCMs: CCSM4, CanESM2, INM-CM4):
+For both models below (RSF and Population Growth), we simulated changes across 90 years 
+of climate-driven landscape change [as described in @stewart; available [here](https://drive.google.com/file/d/1NHzLDCbfEr2x5J3eD59r7uojrE-VN1y9/)].
 
-- decadal mean relative selection + uncertainty RSF layers (`.rds`);
-- disturbance summary at year 2100 (`.rds`).
-- annual caribou population demographics table maps.
+### Boreal Population Resource Selection (RSF)
 
-```{r NWT-file-info-caribou}
-allFilesCaribou_NWT <- subset(dir_info(nwt_data_dirs$caribou, recurse = TRUE), type == "file")
-allFilesCaribou_NWT$ext <- tools::file_ext(allFilesCaribou_NWT$path)
-simFilesCaribou <- basename(grep("CanESM2_run1", allFilesCaribou_NWT$path, value = TRUE))
-```
+We forecast suitable habitat for Boreal woodland caribou (_Rangifer tarandus caribou_) across the union of the three sets of polygons containing Northwest Territories' caribou ranges. We generated the following products, where `SHP` stands for the shapefile used for the maps (RangePlanRegions, GNWT_NT1_range, Revised_Study_Areas), `YYYY` stands for the year (2011, 2031, 2051, 2071 or 2091), `RR` stands for the replicate number (01 to 10), `CLIMMOD` stands for the climate model (CanESM5 or CNRM-ESM2-1) and `XXX` stands for the SSP (370 or 585) : 
+ 
+- bi-decadal relative selection (RSF) forecast for each climate model and replicate (`NT1_BCR6_CLIMMOD_SSPXXX_runRR_relativeSelectioncaribouRSF_NT_YearYYYY.tif`);
+- bi-decadal relative selection (RSF) forecast uncertainty (in the form of standard error) for each climate model and replicate (`NT1_BCR6_CLIMMOD_SSPXXX_runRR_relativeSelectionUncertaincaribouRSF_NT_YearYYYY.tif`);
+- For each shapefile:
+  - map of the average difference between first and last year across:
+     - all climate models and SSP (`averageDifference_SHP_allScenarios.png`)
+     - each climate models and SSP (`averageDifference_SHP_NT1_BCR6_CLIMMOD_SSPXXX.png`)
+  - map of the SD difference first and last year across:
+     - all climate models and SSP (`sdDifference_SHP_allScenarios.png`)
+     - each climate models and SSP (`sdDifference_SHP_NT1_BCR6_CLIMMOD_SSPXXX.png`)
+  - Table of mean, standard deviation (SD) and confidence interval (CI) of binned RSF values for each polygon within the shapefile, climate model and replicate within the shapefile (`meanRSFperPolygon_SHP.qs`)
+  - Summarized table with mean, standard deviation (SD) and confidence interval (CI) of binned RSF values for each polygon within the shapefile, both for all and across climate model, across replicates (`meanRSFperPolySummary_SHP.qs`)
 
-Total archive size: `r paste0(sum(allFilesCaribou_NWT$size), "B")`.
+### Boreal Population Growth
 
-### Birds simulations
+We also simulated demographic parameters for all polygons within all three shapefiles. We generated the following products, where `SHP` stands for the shapefile used for the maps (RangePlanRegions, GNWT_NT1_range, Revised_Study_Areas), `YYYY` stands for the year (2011, 2031, 2051, 2071 or 2091), `RR` stands for the replicate number (01 to 10), `CLIMMOD` stands for the climate model (CanESM5 or CNRM-ESM2-1) and `XXX` stands for the SSP (370 or 585) : 
 
-Our simulation experiments were designed to contrast climate-sensitive and non-climate sensitive models for landbirds from 2011-2100 [Table 2, @micheletti2021].
-
-```{r NWT-file-info-birds-all}
-allFilesBirds_NWT <- subset(dir_info(nwt_data_dirs$birds_raw, recurse = TRUE), type == "file")
-allFilesBirds_NWT$ext <- tools::file_ext(allFilesBirds_NWT$path)
-summaryFilesBirds_NWT <- subset(dir_info(nwt_data_dirs$birds, recurse = TRUE), type == "file")
-summaryFilesBirds_NWT$ext <- tools::file_ext(summaryFilesBirds_NWT$path)
-simFilesBirds <- basename(grep("LandR[.]CS_fS/run3", allFilesBirds_NWT$path, value = TRUE))
-```
-
-Each simulation run produced the following files:
-
-- bird prediction maps for every 20 years for each study species in geotiff format (`.tif`)
-
-Table 1 of Micheletti et al. [-@micheletti2021] summarizes the landbird species for which prediction models and analyses were run:
-
-```{r NWT-bird-species}
-rasters_v6a <- dir_ls(nwt_data_dirs$birds, recurse = TRUE, regexp = "LandR[.]CS_fS_V6a.*delta[.]tif$", type = "file")
-species_NWT <- unique(substr(basename(rasters_v6a), 1, 4)) ## species codes from files
-species_df_NWT <- read.csv(file.path(dataDir, "bird_species_NWT.csv"), header = TRUE) ## from Table 1 of Micheletti et al. 2021
-stopifnot(identical(species_NWT, species_df_NWT$Species.code))
-knitr::kable(species_df_NWT)
-```
-
-Total raw archive size: `r paste0(sum(allFilesBirds_NWT$size), "B")`.
-Total summary archive size: `r paste0(sum(summaryFilesBirds_NWT$size), "B")`.
-
-### Web app development
-
-*Alex Chubaty and Peter Solymos*
-
-**Data availability:**
-
--   All simulation files stored on FOR-CAST Research & Analytics servers.
--   Bird summary rasters are being shared with Peter via Google Drive: <https://drive.google.com/drive/folders/1wk7fFJCxtj5mMRJaExtz97Qx_8yQDS86>
-
-## Project Outputs (WBI)
-
-![](https://github.com/PredictiveEcology/WBI_studyAreas/raw/main/figures/WBI_Management_Updated.jpg)
-
-Expected March 31, 2022.
-
-### Landscape simulations
-
-*Alex Chubaty*
-
-1.  landscape simulation outputs for every 10 years for each run and climate model for each study area;
-
-Code available from <https://github.com/PredictiveEcology/WBI_forecasts>.
-
-
-**Data availability:**
-
--   All simulation files stored on FOR-CAST Research & Analytics servers.
--   A subset of outputs will be available via Google Drive for authorized users: <https://drive.google.com/drive/folders/1xnVV65KOBTGdE4y0TP49Q1sfiGFMHVUF>
+- layers used for population growth calculation per climate model and replicate (`caribouLayers_yearYYYY_NT1_BCR6_CLIMMOD_SSPXXX_runRR.tif`)
+- disturbance summary at year 2091 (which contains all disturbances for all other years), per climate model and replicate (`disturbances_Year2091_NT1_BCR6_CLIMMOD_SSPXXX_runRR_year2091.rds`).
+- predicted caribou values (lambda, recruitment and adult female mortality) at year 2091 (which contains values for all other years), per climate model and replicate (`predictedCaribou_Year2091_NT1_BCR6_CLIMMOD_SSPXXX_runRR_year2091.rds`).
+- caribou population demographics plots per polygon per shapefile, showing increasing levels of uncertainty (5 to 85 quantiles; colored bands) using climate models and replicates as uncertainty measures (`caribou_SHP_allCM_Johnson_Johnson.png`) 
+- caribou population demographics table (summary) per polygon per shapefile, replicate and climate model (`populationGrowthTable.csv`) 
+- disturbance table (summary) per polygon per shapefile, replicate and climate model (`disturbanceTable.csv`) 
 
 #### Raw outputs:
 
-```{r file-info-landscape-raw}
-# allFilesLandscapeRaw <- subset(dir_info(wbi_data_dirs$landscape_raw, recurse = TRUE), type == "file")
-# allFilesLandscapeRaw$ext <- tools::file_ext(allFilesLandscapeRaw$path)
-# allFilesLandscapeRaw <- subset(allFilesLandscapeRaw, ext != "gz")
-# 
-# # unique(allFilesLandscapeRaw$ext)
-# 
-# png(file.path(figsDir, "file_size_hist_landscape_raw.png"), height = 800, width = 800)
-# hist(log(allFilesLandscapeRaw$size), xlab = "log(filesize)")
-# dev.off()
-# 
-# hist(log(allFilesLandscapeRaw$size), xlab = "log(filesize)")
+```{r NWT-file-info-boo-raw}
+caribouRSF_raw <- subset(fs::dir_info(nwt_data_dirs$caribouRSF_raw, recurse = TRUE), type == "file")
+caribouRSF_raw$ext <- tools::file_ext(caribouRSF_raw$path)
+caribouPopGrowth_raw <- subset(fs::dir_info(nwt_data_dirs$caribouPopGrowth_raw, recurse = TRUE), type == "file")
+caribouPopGrowth_raw$ext <- tools::file_ext(caribouPopGrowth_raw$path)
 ```
 
-Total archive size: `r #paste0(sum(allFilesLandscapeRaw$size), "B")`.
+Total archive size: `r paste0(sum(caribouRSF_raw$size, caribouPopGrowth_raw$size), "B")`.
 
 #### Summarized layers:
 
-```{r file-info-landscape}
-# allFilesLandscape <- subset(dir_info(wbi_data_dirs$landscape, recurse = TRUE), type == "file")
-# allFilesLandscape$ext <- tools::file_ext(allFilesLandscape$path)
-# 
-# unique(allFilesLandscape$ext)
-# 
-# png(file.path(figsDir, "file_size_hist_landscape.png"), height = 800, width = 800)
-# hist(log(allFilesLandscape$size), xlab = "log(filesize)")
-# dev.off()
-# 
-# hist(log(allFilesLandscape$size), xlab = "log(filesize)")
+```{r NWT-file-info-boo}
+allFilesLandscape_NWT <- subset(fs::dir_info(nwt_data_dirs$landscape, recurse = TRUE), type == "file")
+allFilesLandscape_NWT$ext <- tools::file_ext(allFilesLandscape_NWT$path)
 ```
 
-Total archive size: `r #paste0(sum(allFilesLandscape$size), "B")`.
 
-### Caribou simulations
-
-*Tati Micheletti*
-
-1.  caribou population demographics table maps for every decade for each study area;
-
-Code available from <https://github.com/PredictiveEcology/WBI_forecasts/10c-post-processing-caribou.R>.
-
-**Data availability:**
-
--   All simulation files stored on FOR-CAST Research & Analytics servers.
--   A subset of outputs will be available via Google Drive for authorized users.
-
-```{r file-info-caribou}
-# allFilesCaribou <- subset(dir_info(wbi_data_dirs$caribou, recurse = TRUE), type == "file")
-# allFilesCaribou$ext <- tools::file_ext(allFilesCaribou$path)
-# 
-# unique(allFilesCaribou$ext)
-# 
-# png(file.path(figsDir, "file_size_hist_caribou.png"), height = 800, width = 800)
-# hist(log(allFilesCaribou$size), xlab = "log(filesize)")
-# dev.off()
-# 
-# hist(log(allFilesCaribou$size), xlab = "log(filesize)")
+```{r NWT-file-info-caribou}
+caribou <- subset(dir_info(nwt_data_dirs$caribou, recurse = TRUE), type == "file")
+caribou$ext <- tools::file_ext(caribou$path)
+caribou <- basename(grep("CanESM2_run1", caribou$path, value = TRUE))
 ```
 
-Total archive size: `r #paste0(sum(allFilesCaribou$size)), "B")`.
+Total archive size: `r paste0(sum(caribou$size), "B")`.
 
-### Birds simulations
+All caribou summary products can be find at <https://drive.google.com/drive/u/0/folders/1IpC_u5c7Mluvqdxzk3pue5NFaBHyY6A6>
 
-*Tati Micheletti*
+## Code availability  
 
-1.  bird prediction maps for every 20 years for all 115 species for each study area;
+All code used for the current project is publicly available at: <https://github.com/FOR-CAST/NT_caribou>. 
+Some additional tools used and details of specific scripts are described below. 
 
-Described in [@micheletti2021].
+### Additional tools for analyzing simulation results
 
-We have predictions, summaries, etc. layer for the following landbird species:
-
-```{r file-info-birds, eval = FALSE}
-## TODO: update this for WBI: 115 spp
-# rasters_v6a <- dir_ls(wbi_data_dirs$birds, recurse = TRUE, regexp = "LandR[.]CS_fS_V6a.*delta[.]tif$", type = "file")
-# 
-# species <- unique(substr(basename(rasters_v6a), 1, 4)) ## species codes from files
-# species_df <- read.csv(file.path(dataDir, "bird_species_NWT.csv"), header = TRUE) ## from Table 1 of Micheletti et al. 2021
-# 
-# stopifnot(identical(species, species_df$Species.code))
-# 
-# knitr::kable(species_df)
-```
-
-Code available from <https://github.com/PredictiveEcology/WBI_forecasts/10b-post-processing-birds.R>.
-
-**Data availability:**
-
--   All simulation files stored on FOR-CAST Research & Analytics servers.
--   A subset of outputs will be available via Google Drive for authorized users.
-
-```{r file-info-birds-all}
-# allFilesBirds <- subset(dir_info(wbi_data_dirs$birds, recurse = TRUE), type == "file")
-# allFilesBirds$ext <- tools::file_ext(allFilesBirds$path)
-# 
-# unique(allFilesBirds$ext)
-# 
-# png(file.path(figsDir, "file_size_hist_birds.png"), height = 800, width = 800)
-# hist(log(allFilesBirds$size), xlab = "log(filesize)")
-# dev.off()
-# 
-# hist(log(allFilesBirds$size), xlab = "log(filesize)")
-```
-
-Total archive size: `r #paste0(sum(allFilesBirds$size), "B")`.
-
-### Priority Places simulations
-
-*Tati Micheletti*
-
-1.  landscape simulation outputs for every 20 years;
-2.  bird prediction maps for every 20 years;
-3.  caribou RSF predicted maps for every 20 years;
-4.  "solution" rasters and corresponding pixel data.tables for each species (i.e., ordered bird or RSF abundances and values);
-5.  calculated bird abundances for all scenarios (% area) for each species, year, climate model and run
-6.  final table of total abundance for all species, years, climate models and runs.
-
-**Data availability:**
-
--   All simulation files stored on FOR-CAST Research & Analytics servers.
--   A subset of outputs will be available via Google Drive for authorized users: <https://drive.google.com/file/d/1NnXuVHSIVHcz62NRFsNGbIbxTqsbucad/>
-
-```{r file-info-priority-all}
-# allFilesPriority <- subset(dir_info(wbi_data_dirs$birds, recurse = TRUE), type == "file")
-# allFilesPriority$ext <- tools::file_ext(allFilesPriority$path)
-# 
-# unique(allFilesPriority$ext)
-# 
-# png(file.path(figsDir, "file_size_hist_birds.png"), height = 800, width = 800)
-# hist(log(allFilesPriority$size), xlab = "log(filesize)")
-# dev.off()
-# 
-# hist(log(allFilesPriority$size), xlab = "log(filesize)")
-```
-
-Total archive size: `r #paste0(sum(allFilesPriority$size), "B")`.
-
-### Harvesting
-
-*Greg Paradis*
-
-<!-- DESCRIPTION NEEDED -->
-
-Harvesting projections.
-
-**Data availability:**
-
--   TBD
-
-### Roads
-
-*Josie Hughes*
-
-Our focus has been developing and assessing a road network projection tool that could be used with harvest projection tool, rather than actually doing the projections.
-The package built and available from <https://landscitech.github.io/roads/>.
-
-We have a partially finished draft manuscript focused on assessing tool performance (results and analysis done, work to do on the writing).
-We will post the code required to reproduce our analysis with the paper here: <https://github.com/LandSciTech/RoadAnalysis>.
-We will likely post our example inputs & outputs in an OSF project associated with the paper, but we have not done that yet.
-Finishing the paper is on my to-do list for the coming months, but may or may not make it to the top of priority list, as there are a number of other projects that are higher priority for my management.
-
-Greg was intending to integrate with harvest projections, but I don't know the current state of this integration.
-Road network projection can be done as a post-processing step, as the method links harvest blocks to the road network but does not influence the placement of blocks.
-
-### Carbon
-
-*Alex Chubaty*
-
-<!-- DESCRIPTION NEEDED -->
-
-**Data availability:**
-
--   All simulation files stored on FOR-CAST Research & Analytics servers
--   A subset of outputs will be available via Google Drive for authorized users: <https://drive.google.com/drive/u/1/folders/16oQyHcci_dp5cCnm3BS7tafT_JuMn34Y>
-
-### Insect disturbance simulations
-
-*Alex Chubaty*
-
-<!-- DESCRIPTION NEEDED -->
-
-#### Mountain pine beetle
-
-<!-- DESCRIPTION NEEDED -->
-
-**Data availability:**
-
--   All simulation files stored on FOR-CAST Research & Analytics servers
--   A subset of outputs will be available via Google Drive for authorized users: <https://drive.google.com/drive/folders/1ZeoqiVcFKKy4fCC8tRDRh0Y9RZK3mhHE>
-
-#### Spruce budworm
-
-<!-- DESCRIPTION NEEDED -->
-
-**Data availability:**
-
--   All simulation files stored on FOR-CAST Research & Analytics servers
--   A subset of outputs will be available via Google Drive for authorized users: <https://drive.google.com/drive/folders/1kA7oZObQDDYiqdmif_cuzfxbV4GtpOPi>
-
-# Additional tools for analyzing simulation results
-
-## `Biomass_summary` module
+#### `Biomass_summary` module
 
 Summarizes the results of multiple LandR Biomass simulations, across multiple study areas, climate scenarios, and replicates.
 Intended to be used for post-simulation processing of multiple LandR Biomass simulations, following a LandR-fS project structure and workflow described and templated in the `SpaDES.project` package.
 
 Available from: <https://github.com/PredictiveEcology/Biomass_summary>
 
-## `caribouMetrics` package
+#### `caribouMetrics` package
 
 Implements caribou resource selection functions, as well as caribou population and demographic models.
 Incorporates code form Tati's [`caribouPopGrowthModel`](https://github.com/tati-micheletti/caribouPopGrowthModel) module and is used in this module to add uncertainty due to beta distribution used to fit the original models proposed by Johnson et al. [-@johnson2020].
 
-Available from: <https://github.com/LandSciTech/caribouMetrics> (currently a private repo)
+Available from: <https://github.com/LandSciTech/caribouMetrics>
 
-## `fireSense_summary` module
+#### `fireSense_summary` module
 
 Summarizes the results of multiple fireSense simulations, across multiple study areas, climate scenarios, and replicates.
 Creates burn summary figures, historic burn summary plots, and cumulative simulated burn maps.
 
 Available from: <https://github.com/PredictiveEcology/fireSense_summary>
 
-## NWT `posthocFunctions` scripts
-
-Various utilities to summarize the NWT simulation outputs and create plots for vegetation, wildfire, landbird, and caribou components.
-
-In particular, provides scripts for producing the plots used in Micheletti et al. [-@micheletti2021]:
-
-- <https://github.com/tati-micheletti/NWT/blob/development/posthocFunctions/!!!plotsPaper_NotFun.R>
-
-As well as those in Stewart et al. [-@stewart]:
-
-- <https://github.com/tati-micheletti/NWT/blob/development/posthocFunctions/!!!caribouMSPlots.R>
-
-Available from: <https://github.com/tati-micheletti/NWT/tree/development/posthocFunctions>
-
-## `posthocLandR` module
+#### `posthocLandR` module
 
 Post-processing module for LandR Biomass simulations.
 Prepares the biomass, leading species, average forest age objects for summary across simulations.
 
+<!-- AC to review this address!! -->
+
 Available from: <https://github.com/tati-micheletti/NWT/blob/development/modules/posthocLandR/posthocLandR.R>
 
-## `usefulFuns` package
+#### `usefulFuns` package
 
 Various utilities for producing summary plots and objects, including:
 
@@ -448,10 +225,16 @@ Various utilities for producing summary plots and objects, including:
 
 Available from: <https://github.com/PredictiveEcology/usefulFuns> (forked form <https://github.com/tati-micheletti/usefulFuns>)
 
-#### NOTE:
+#### Summary `R` scripts
 
-- These `usefulFuns` repositories are not actively maintained, although a tagged version of the package used for Tati's original analyses does work with the corresponding version of the model code.
-- Tati's repository is currently out of sync with the Predictive Ecology fork (both ahead and behind on several commits).
+Various utilities to summarize the NWT simulation outputs and create plots for 
+caribou components can be found in the `R` folder within the repository. 
+
+- <https://github.com/FOR-CAST/NT_caribou/tree/main/R>
+
+More specifically, the script used to create summaries and maps for both RSF and population growth can be found at:    
+
+- <https://github.com/FOR-CAST/NT_caribou/tree/main/R/summarizeCaribou.R>
 
 # References
 
