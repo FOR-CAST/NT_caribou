@@ -19,7 +19,7 @@ scratchDirOrig <- scratchDir
 source("03-paths.R")
 source("04-options.R")
 source("05-google-ids.R")
-source('06-studyArea.R')
+source("06-studyArea.R")
 
 source("R/rstCurrentBurnListGenerator_NT.R")
 source("R/makeStudyArea_NT_caribou.R")
@@ -33,7 +33,6 @@ for (RP in REPS) {
       for (P in studyAreaNames) {
         fls <- list.files(file.path("outputs", P, "posthoc"))
         if (length(fls) != 0) {
-
           allFls <- grepMulti(fls, patterns = c(RP, CS, SS, P), unwanted = ".aux.xml")
           if (length(allFls) == 115*5) {
             message(crayon::green(paste0("Simulations done for:", paste(P, SS, CS, RP, collapse = " "))))

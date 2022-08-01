@@ -32,7 +32,7 @@ dynamicPaths <- defaultPaths
 dynamicPaths[["cachePath"]] <- file.path(cacheDir, "cache_sim")
 dynamicPaths[["outputPath"]] <- file.path("outputs", runName)
 
-## postprocessing paths
+## post-processing paths
 posthocPaths <- defaultPaths
 posthocPaths[["cachePath"]] <- file.path(cacheDir, "cache_posthoc", studyAreaName)
 posthocPaths[["outputPath"]] <- checkPath(file.path(defaultPaths[["outputPath"]], "posthoc"), create = TRUE)
@@ -41,5 +41,5 @@ posthocPaths[["scratchPath"]] <- checkPath(file.path(scratchDir, "posthoc"), cre
 ## summary paths
 summaryPaths <- defaultPaths
 summaryPaths[["cachePath"]] <- file.path(cacheDir, "cache_summary")
-summaryPaths[["outputPath"]] <- checkPath(file.path(dirname(defaultPaths[["outputPath"]]), "summary"), create = TRUE)
+summaryPaths[["outputPath"]] <- checkPath(file.path(defaultPaths[["outputPath"]], "summary"), create = TRUE)
 summaryPaths[["scratchPath"]] <- checkPath(file.path(scratchDir, "summary"), create = TRUE)

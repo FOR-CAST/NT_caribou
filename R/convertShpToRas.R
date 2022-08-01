@@ -3,7 +3,7 @@ convertShpToRas <- function(genericShp,
                             destinationPath,
                             background = NA,
                             rasStk = FALSE,
-                            shapefileName = "genericShp"){
+                            shapefileName = "genericShp") {
   # If the polygons intercept and rasList = FALSE,
   # the function will return one rasterLayer and the
   # polygon with higher ID will be on top.
@@ -11,7 +11,7 @@ convertShpToRas <- function(genericShp,
   # be returned, where each polygon is a layer
   message(crayon::blue("Fasterizing shapefile..."))
 
-  if (as.character(crs(genericShp)) != as.character(crs(rasterToMatch))){
+  if (as.character(crs(genericShp)) != as.character(crs(rasterToMatch))) {
     genericShp <- Cache(reproducible::postProcess, x = genericShp,
                         rasterToMatch = rasterToMatch,
                         destinationPath = destinationPath,
@@ -22,19 +22,19 @@ convertShpToRas <- function(genericShp,
 
   genericShpSF <- sf::st_as_sf(genericShp)
 
-  nm <- if (!is.null(genericShp$NAME)){
+  nm <- if (!is.null(genericShp$NAME)) {
     "NAME"
   } else {
     if (!is.null(genericShp$Name)) {
       "Name"
     } else {
-      if (!is.null(genericShp$HERD)){
+      if (!is.null(genericShp$HERD)) {
         "HERD"
       } else {
-        if (!is.null(genericShp$POPULATION)){
+        if (!is.null(genericShp$POPULATION)) {
           "POPULATION"
         } else {
-          if (!is.null(genericShp$REGION)){
+          if (!is.null(genericShp$REGION)) {
             "REGION"
           } else {
             NULL
@@ -43,10 +43,11 @@ convertShpToRas <- function(genericShp,
       }
     }
   }
-  if (is.null(nm))
+  if (is.null(nm)) {
     stop(paste0("The shapefile ", shapefileName, " does not have a field named ",
                 "'NAME', 'Name', 'REGION' or 'POPULATION'. Please add that to it and run the ",
                 "function again"))
+  }
 
   genericShpSF$ID <- as.numeric(seq(1:length(genericShpSF[[nm]])))
   genericShpRas <- fasterize::fasterize(sf = genericShpSF,
@@ -57,7 +58,7 @@ convertShpToRas <- function(genericShp,
   availableInRas <- na.omit(unique(genericShpRas[]))
   polsToRemove <- setdiff(genericShpSF[["ID"]], availableInRas)
   genericShpSF <- genericShpSF[!genericShpSF$ID %in% polsToRemove,]
-  if (rasStk){
+  if (rasStk) {
     genericRAS <- raster::stack(lapply(genericShpSF[["ID"]], function(polyID){
       # Subset the shp by the polyID
       genericShpSFSub <- genericShpSF[genericShpSF$ID == polyID,]

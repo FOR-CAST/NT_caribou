@@ -64,7 +64,7 @@ tati:
     googleuser: "tati.micheletti@gmail.com"
     usecloud: false ## TODO: use cloud cache
   codechecks: false ## TODO: set false after all fixed
-  nreps: 5
+  nreps: 10
   paths:
     scratchdir: "/mnt/scratch/tmichele/" ## !expr if (grepl("for-cast[.]ca", Sys.info()[["nodename"]])) "/mnt/scratch/NT_caribou" else "/tmp/scratch/NT_caribou"
   reupload: !expr if (grepl("picea", Sys.info()[["nodename"]])) TRUE else FALSE

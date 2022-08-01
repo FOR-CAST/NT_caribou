@@ -36,6 +36,7 @@ git clone --recurse-submodules -j8 https://github.com/FOR-CAST/NT_caribou
 - [PredictiveEcology/Biomass_speciesData](https://github.com/PredictiveEcology/Biomass_speciesData)
 - [PredictiveEcology/Biomass_speciesFactorial](https://github.com/PredictiveEcology/Biomass_speciesFactorial)
 - [PredictiveEcology/Biomass_speciesParameters](https://github.com/PredictiveEcology/Biomass_speciesParameters)
+- [PredictiveEcology/Biomass_summary](https://github.com/PredictiveEcology/Biomass_summary)
 - [ianmseddy/gmcsDataPrep](https://github.com/ianmseddy/gmcsDataPrep)
 
 ##### fireSense
@@ -49,6 +50,7 @@ git clone --recurse-submodules -j8 https://github.com/FOR-CAST/NT_caribou
 - [PredictiveEcology/fireSense_SpreadPredict](https://github.com/PredictiveEcology/fireSense_SpreadPredict)
 - [PredictiveEcology/fireSense_dataPrepFit](https://github.com/PredictiveEcology/fireSense_dataPrepFit)
 - [PredictiveEcology/fireSense_dataPrepPredict](https://github.com/PredictiveEcology/fireSense_dataPrepPredict)
+- [PredictiveEcology/fireSense_summary](https://github.com/PredictiveEcology/fireSense_summary)
 
 ### Prerequisites
 
@@ -61,4 +63,3 @@ devtools::has_devel()
 
 The code is mostly self-sufficient: additional packages than those below are needed, but will be installed automatically.
 See `01-packages.R` to see which additional packages will be used.
-

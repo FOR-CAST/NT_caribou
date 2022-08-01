@@ -1,10 +1,9 @@
 ---
-title: "NT Caribou Deliverables"
+title: "Extended analyses for Northwest Territories caribou range planning"
 author: "Alex M. Chubaty & Tati Micheletti"
-date: "2022-07-28"
+date: "2022-07-29"
 output:
-  html_document: default
-  word_document: default
+  pdf_document: default
 editor_options:
   chunk_output_type: console
   markdown:
@@ -20,25 +19,20 @@ knitr::opts_chunk$set(
   warning = FALSE,
   results = "hold"
 )
+
 if (file.exists(".Renviron")) readRenviron(".Renviron")
-pkgDir <- Sys.getenv("PRJ_PKG_DIR")
-if (!nzchar(pkgDir)) {
-  pkgDir <- "packages" ## default: use subdir within project directory
+
+source("01a-packages-libPath.R")
+
+if (!"Require" %in% rownames(installed.packages())) {
+  remotes::install_github("PredictiveEcology/Require@development")
+} else if (packageVersion("Require") < "0.1.0.9000") {
+  remotes::install_github("PredictiveEcology/Require@development")
 }
-pkgDir <- normalizePath(
-  file.path(pkgDir, version$platform, paste0(version$major, ".", strsplit(version$minor, "[.]")[[1]][1])),
-  winslash = "/",
-  mustWork = FALSE
-)
-if (!dir.exists(pkgDir)) {
-  dir.create(pkgDir, recursive = TRUE)
-}
-.libPaths(pkgDir)
-if (!require("Require", quietly = TRUE)) {
-  install.packages("Require")
-  library("Require")
-}
+library("Require")
+
 Require(c("fs", "knitr", "qs"))
+
 studyAreaName <- "NT1" #TODO IF THE COMMIT 01e7cc6a00d6a34f956e9efa278735587957994c is reversed, data needs to be moved and this needs to be updated! ~TM
 
 nwt_data_dirs <- list(
@@ -49,6 +43,7 @@ nwt_data_dirs <- list(
   caribou = file.path("outputs", studyAreaName, "summary", "caribouPlots")
 )
 stopifnot(dir.exists(unlist(nwt_data_dirs))) # Use base R instead of xfun package
+
 ```
 
 ## Overview

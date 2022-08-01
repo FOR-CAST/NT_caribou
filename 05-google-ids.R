@@ -10,6 +10,7 @@ data.table::set(gdriveSims, NULL, "simObject", factor(gdriveSims$simObject, leve
 data.table::setkeyv(gdriveSims, c("studyArea", "simObject", "runID", "gcm", "ssp"))
 
 gid_results <- gdriveSims[studyArea == studyAreaName & simObject == "results", gid]
+gid_resultsCaribou <- gdriveSims[studyArea == studyAreaName & simObject == "resultsCaribou", gid]
 
 update_googleids <- function(x, gdriveSims) {
   gdriveSims_updated <- rbind(gdriveSims, x)
