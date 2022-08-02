@@ -34,3 +34,5 @@ spreadOut*
 # googledrive/gargle auth
 .secret
 western-boreal-initiative-*.json
+
+*.tex
