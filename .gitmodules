@@ -67,3 +67,6 @@
 [submodule "modules/fireSense_summary"]
 	path = modules/fireSense_summary
 	url = https://github.com/PredictiveEcology/fireSense_summary
+[submodule "templates"]
+	path = templates
+	url = https://github.com/svmiller/svm-r-markdown-templates
