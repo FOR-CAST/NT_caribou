@@ -8,6 +8,9 @@ git submodule add https://github.com/tati-micheletti/caribouRSF_NT modules/carib
 ## climate data
 git submodule add https://github.com/PredictiveEcology/canClimateData modules/canClimateData
 
+## historic fires
+git submodule add https://github.com/PredictiveEcology/historicFires modules/historicFires
+
 ## LandR
 git submodule add https://github.com/PredictiveEcology/Biomass_borealDataPrep modules/Biomass_borealDataPrep
 git submodule add https://github.com/PredictiveEcology/Biomass_core modules/Biomass_core

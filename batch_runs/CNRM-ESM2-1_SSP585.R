@@ -1,4 +1,4 @@
-#runName = "NT1_BCR6_CNRM-ESM2-1_SSP585_run01"; source("00b-global_sim.R")
+runName = "NT1_BCR6_CNRM-ESM2-1_SSP585_run01"; source("00b-global_sim.R")
 runName = "NT1_BCR6_CNRM-ESM2-1_SSP585_run02"; source("00b-global_sim.R")
 runName = "NT1_BCR6_CNRM-ESM2-1_SSP585_run03"; source("00b-global_sim.R")
 runName = "NT1_BCR6_CNRM-ESM2-1_SSP585_run04"; source("00b-global_sim.R")

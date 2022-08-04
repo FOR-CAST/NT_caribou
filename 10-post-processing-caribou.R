@@ -1,6 +1,6 @@
 if (file.exists(".Renviron")) readRenviron(".Renviron")
 
-# source("01a-packages-libPath.R")
+# source("01-packages-libPath.R")
 source("01-packages.R")
 
 Require(c("caribouMetrics", "raster", "sf", "tictoc", "usefulFuns"))
