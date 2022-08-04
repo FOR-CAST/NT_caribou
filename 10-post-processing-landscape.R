@@ -29,7 +29,7 @@ parallel::mclapply(studyAreaNames, function(sAN) {
   posthocParams <- list(
     Biomass_summary = list(
       climateScenarios = climateScenarios,
-      simOutputPath = dirname(defaultPaths$outputPath), ## "outputs"
+      simOutputPath = defaultPaths$outputPath,
       studyAreaNames = sAN,
       reps = nReps,
       upload = doUpload,
@@ -37,7 +37,7 @@ parallel::mclapply(studyAreaNames, function(sAN) {
     ),
     fireSense_summary = list(
       climateScenarios = climateScenarios,
-      simOutputPath = dirname(defaultPaths$outputPath), ## "outputs"
+      simOutputPath = defaultPaths$outputPath,
       studyAreaNames = sAN,
       reps = nReps,
       upload = doUpload
