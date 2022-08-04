@@ -2,13 +2,13 @@
 title: "Extended analyses for Northwest Territories caribou range planning"
 author:
 - affiliation: FOR-CAST Research & Analytics
-  name: Alex M. Chubaty
+  name: Alex M. Chubaty (achubaty@for-cast.ca)
 - affiliation: University of British Columbia
-  name: Tati Micheletti
+  name: Tati Micheletti (tati.micheletti@gmail.com)
 #abstract: ""
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 #keywords: ""
-# thanks: ""
+#thanks: ""
 output:
   pdf_document:
     citation_package: natbib
@@ -17,18 +17,20 @@ output:
     latex_engine: pdflatex
     template: templates/svm-latex-ms.tex
 header-includes:
+  - \usepackage{doi}
   - \usepackage{fancyhdr}
   - \usepackage{graphicx}
   - \usepackage{hyperref}
   - \usepackage{upquote}
   - \pagestyle{fancy}
   - \fancyhf{}
+  - \fancyfoot[R]{\thepage}
   - \fancypagestyle{plain}{\pagestyle{fancy}}
   - \setlength\headheight{72pt}
   - \rhead{\includegraphics[width=4cm]{images/logo.png}}
+  - \bibpunct{(}{)}{;}{a}{}{,}
 bibliography: references.bib
-biblio-style: mee
-csl: mee.csl
+biblio-style: abbrvnat
 editor_options:
   chunk_output_type: console
   markdown:
@@ -72,7 +74,7 @@ knitr::opts_chunk$set(
 
 ## Overview
 
-We simulated vegetation, wildfire, and caribou in the NT1 study area for the years 2011-2100 following the modelling approaches of @micheletti2021 and @stewart.
+We simulated vegetation, wildfire, and caribou in the NT1 study area for the years 2011-2100 following the modelling approaches of @micheletti2021 and @stewart, developed for an initial pilot study in the Northwest Territories.
 All models have been developed using the PERFICT approach [@mcintire2022], which enables them to be part of update cycles as needed going forward.
 
 Here, we used the most recent CIMP6 climate projections for four climate change scenarios (CanESM5 under each of SSP 370 and 585, as well as CNRM-ESM2-1 under each of SSP 370 and 585).
@@ -95,13 +97,13 @@ Model code for this project is available from <https://github.com/FOR-CAST/NT_ca
 
 A subset of data inputs and model outputs are available from <https://drive.google.com/drive/u/0/folders/0AAAMKzVjPKt5Uk9PVA> (restricted access) and are described in further detail below.
 
-**Filetypes**
-
-- `.tif` files can be opened using the `raster` package in `R` or imported to GIS software (_e.g._, ArcGIS, QGIS);
-- `.qs` files can be opened in `R` using the `qs` package (`qs::qread()`) and these tables may be subsequently saved in an alternate format (_e.g._, `.csv` for use with Microsoft Excel).
+#### Filetypes
 
 Please note that many of these output files are quite large due to the extent of the study area, and one might face software limitations when converting 
 these objects to _e.g._, an Excel-compatible format.
+
+- `.tif` files can be opened using the `raster` package in `R` or imported to GIS software (_e.g._, ArcGIS, QGIS);
+- `.qs` files can be opened in `R` using the `qs` package (`qs::qread()`) and these tables may be subsequently saved in an alternate format (_e.g._, `.csv` for use with Microsoft Excel).
 
 \newpage
 
@@ -114,7 +116,7 @@ Each simulation run produced the following files, where `YYYY` corresponds to th
 
 ```{r outputs-landscape}
 data.frame(
-  `Filename pattern` = c(
+  filename = c(
     "ANPPMap_YYYY_yearYYYY.tif",
     "burnMap_YYYY_yearYYYY.tif",
     "burnSummary_year2100.qs",
@@ -127,7 +129,7 @@ data.frame(
     "rstCurrentBurn_YYYY_yearYYYY.tif",
     "simulatedBiomassMap_YYYY_yearYYYY.tif"
   ),
-  `Description` = c(
+  description = c(
     "yearly aboveground net primary productivity (ANPP) maps",
     "yearly wildfire burn maps",
     "wildfire burn summary for year 2100, containing information on all simulated fires with total area burned for all years",
@@ -141,25 +143,33 @@ data.frame(
     "yearly simulated vegetation biomass maps"
   )
 ) %>%
-  knitr::kable() %>%
+  knitr::kable(col.names = c("Filename pattern", "Description"), booktabs = TRUE) %>%
   kableExtra::kable_styling(font_size = 10, full_width = TRUE, latex_options = c("striped"))
 ```
 
+&nbsp;
+
 All landscape simulation summary products can be found at <https://drive.google.com/drive/u/0/folders/1t6032ggUC__jzaJs5H39LW6iFfrqlK_T> (restricted access).
+
+\newpage
 
 ## Boreal caribou simulations
 
 For both models below (RSF and Population Growth), we simulated changes across 90 years of climate-driven landscape change [as described in @stewart].
 We used the  `caribouMetrics` package (<https://github.com/LandSciTech/caribouMetrics>) which implements caribou resource selection functions, as well as caribou population and demographic models (which extend the original models proposed by Johnson et al. [-@johnson2020]).
 
-### Boreal caribou population resource selection (RSF)
+&nbsp;
+
+All caribou summary products can be found at <https://drive.google.com/drive/u/0/folders/1IpC_u5c7Mluvqdxzk3pue5NFaBHyY6A6> (restricted access).
+
+### Boreal caribou simulation: population resource selection (RSF)
 
 We forecast suitable habitat for Boreal woodland caribou (_Rangifer tarandus caribou_) across the union of the three sets of polygons containing Northwest Territories' caribou ranges.
 We generated the following products, where `SHP` stands for the shapefile used for the maps (`RangePlanRegions`, `GNWT_NT1_range`, `Revised_Study_Areas`), `YYYY` stands for the year (2011, 2031, 2051, 2071 or 2091), `RR` stands for the replicate number (01 to 10), `CLIMMOD` stands for the climate model (CanESM5 or CNRM-ESM2-1) and `XXX` stands for the SSP (370 or 585): 
 
 ```{r outputs-caribouRSF}
 data.frame(
-  `Filename pattern` = c(
+  filename = c(
     "averageDifference_SHP_allScenarios.png",
     "averageDifference_SHP_NT1_BCR6_CLIMMOD_SSPXXX.png",
     "meanRSFperPolygon_SHP.qs",
@@ -169,7 +179,7 @@ data.frame(
     "sdDifference_SHP_allScenarios.png",
     "sdDifference_SHP_NT1_BCR6_CLIMMOD_SSPXXX.png"
   ),
-  `Description` = c(
+  description = c(
     "map of the average difference between first and last year across all climate scenarios, per shapefile",
     "map of the average difference between first and last year across, per climate scenario, per shapefile",
     "summarized table with mean, standard deviation (SD) and confidence interval (CI) of binned RSF values for each polygon within the shapefile, both for all and across climate model, across replicates",
@@ -180,18 +190,20 @@ data.frame(
     "map of the SD difference first and last year, per climate scenario, per shapefile"
   )
 ) %>%
-  knitr::kable() %>%
-  kableExtra::kable_styling(font_size = 10, full_width = TRUE, latex_options = c("scale_down", "striped"))
+  knitr::kable(col.names = c("Filename pattern", "Description"), booktabs = TRUE) %>%
+  kableExtra::kable_styling(font_size = 10, full_width = TRUE, latex_options = c("striped"))
 ```
 
-### Boreal caribou population growth
+\newpage
+
+### Boreal caribou simulations: population growth
 
 We also simulated demographic parameters for all polygons within all three shapefiles.
 We generated the following products, where `SHP` stands for the shapefile used for the maps (`RangePlanRegions`, `GNWT_NT1_range`, `Revised_Study_Areas`), `YYYY` stands for the year (2011, 2031, 2051, 2071 or 2091), `RR` stands for the replicate number (01 to 10), `CLIMMOD` stands for the climate model (CanESM5 or CNRM-ESM2-1) and `XXX` stands for the SSP (370 or 585): 
 
 ```{r outputs-caribouLambda}
 data.frame(
-  `Filename pattern` = c(
+  filename = c(
     "caribouLayers_yearYYYY_NT1_BCR6_CLIMMOD_SSPXXX_runRR.tif",
     "disturbances_Year2091_NT1_BCR6_CLIMMOD_SSPXXX_runRR_year2091.rds",
     "predictedCaribou_Year2091_NT1_BCR6_CLIMMOD_SSPXXX_runRR_year2091.rds",
@@ -199,7 +211,7 @@ data.frame(
     "populationGrowthTable.csv",
     "disturbanceTable.csv"
   ),
-  `Description` = c(
+  description = c(
     "layers used for population growth calculation per climate model and replicate",
     "disturbance summary at year 2091 (which contains all disturbances for all other years), per climate model and replicate",
     "predicted caribou values (lambda, recruitment and adult female mortality) at year 2091 (which contains values for all other years), per climate model and replicate",
@@ -208,10 +220,8 @@ data.frame(
     "disturbance table (summary) per polygon per shapefile, replicate and climate model"
   )
 ) %>%
-  knitr::kable() %>%
-  kableExtra::kable_styling(font_size = 10, full_width = TRUE, latex_options = c("scale_down", "striped"))
+  knitr::kable(col.names = c("Filename pattern", "Description"), booktabs = TRUE) %>%
+  kableExtra::kable_styling(font_size = 10, full_width = TRUE, latex_options = c("striped"))
 ```
-
-All caribou summary products can be found at <https://drive.google.com/drive/u/0/folders/1IpC_u5c7Mluvqdxzk3pue5NFaBHyY6A6> (restricted access).
 
 <!-- References: autogenerated from references.bib -->

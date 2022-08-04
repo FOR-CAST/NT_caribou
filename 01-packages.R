@@ -1,5 +1,10 @@
 source("01a-packages-libPath.R")
 
+if (!require("remotes", quietly = TRUE)) {
+  install.packages("remotes")
+  library(remotes)
+}
+
 if (!"Require" %in% rownames(installed.packages())) {
   remotes::install_github("PredictiveEcology/Require@development")
 } else if (packageVersion("Require") < "0.1.0.9000") {
