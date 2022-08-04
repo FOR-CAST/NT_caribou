@@ -1,7 +1,3 @@
-################################################################################
-## Set paths for each part of the simulation
-################################################################################
-
 scratchDir <- checkPath(file.path(scratchDir, studyAreaName), create = TRUE) ## basedir set in config
 
 defaultPaths <- list(

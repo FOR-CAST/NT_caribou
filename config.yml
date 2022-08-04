@@ -66,7 +66,7 @@ tati:
   codechecks: false ## TODO: set false after all fixed
   nreps: 10
   paths:
-    scratchdir: "/mnt/scratch/tmichele/" ## !expr if (grepl("for-cast[.]ca", Sys.info()[["nodename"]])) "/mnt/scratch/NT_caribou" else "/tmp/scratch/NT_caribou"
+    scratchdir: "/mnt/scratch/tmichele/" ## !expr if (grepl("for-cast[.]ca", Sys.info()[["nodename"]])) "/mnt/scratch/tmichele/NT_caribou" else "/tmp/scratch/NT_caribou"
   reupload: !expr if (grepl("picea", Sys.info()[["nodename"]])) TRUE else FALSE
   simfileformat: "qs"
   useprerun: !expr if (grepl("spades|pseudotsuga", Sys.info()[["nodename"]])) TRUE else FALSE
